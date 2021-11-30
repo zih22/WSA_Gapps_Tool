@@ -1,1 +1,1 @@
-..\tools\7z\7z.exe x system.7z.001
+..\tools\7z\7z.exe x system/system.7z.001
