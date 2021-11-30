@@ -22,6 +22,8 @@ namespace WsaGappsTool
         WebClient gapps_webClient;
         WebClient msix_webClient;
 
+        bool verifyChecksums = false;
+
         public string errorMessage = "";
         public bool error = false;
 
@@ -51,7 +53,7 @@ namespace WsaGappsTool
                 GappsPath = config.CacheDirectory + "gapps.zip";
             }
 
-            if(!Directory.Exists(config.CacheDirectory))
+            if (!Directory.Exists(config.CacheDirectory))
             {
                 Directory.CreateDirectory(config.CacheDirectory);
             }
@@ -103,7 +105,7 @@ namespace WsaGappsTool
             string androidVersion = "11.0";
             string arch = "x86_64";
             string variant = "pico";
-            
+
             string gappsJson = "";
             // Get the latest gapps
             // Download the latest gapps to gapps.zip; android 11; x86-64
@@ -127,11 +129,11 @@ namespace WsaGappsTool
             JsonElement gappsJsonElement = gappsJsonDoc.RootElement;
             // Get the latest gapps for android 11; x86-64
             JsonElement gappsElement = gappsJsonElement.GetProperty("archs").GetProperty(arch).GetProperty("apis").GetProperty(androidVersion).GetProperty("variants"); // Get the list of the latest releases for android 11; x86-64
-            JsonElement gappsVariantElement = gappsElement.EnumerateArray().ElementAt(0); // Get pico archive
-            string gappsUrl = gappsVariantElement.GetProperty("zip").GetString();
-            string gappsMD5 = gappsVariantElement.GetProperty("md5").GetString();
+            JsonElement gappsVariantElement = gappsElement.EnumerateArray().ElementAt(0); // Get pico archive (first entry should always be pico)
+            string gappsUrl = gappsVariantElement.GetProperty("zip").GetString(); // Download URL for zip
+            string gappsMD5 = gappsVariantElement.GetProperty("md5").GetString(); // Download URL for MD5 hash
             //Debug.WriteLine(gappsUrl);
-            
+
             // Download the gapps package
             webRequest = (HttpWebRequest)WebRequest.Create(gappsUrl);
             webRequest.Method = "GET";
@@ -150,35 +152,36 @@ namespace WsaGappsTool
             gapps_webClient.DownloadFileCompleted += Gapps_webClient_DownloadFileCompleted;
             gapps_webClient.DownloadFileAsync(webRequest.RequestUri, GappsPath);
 
-            // Download MD5 hash
-            HttpWebRequest webRequestMD5 = (HttpWebRequest)WebRequest.Create(gappsMD5);
-            webRequestMD5.Method = "GET";
-            webRequestMD5.ContentType = "application/json";
-            webRequestMD5.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36";
-            webRequestMD5.Accept = "application/json";
-            // Trick sourceforge into thinking we're downloading from the site
-            webRequestMD5.Referer = "https://sourceforge.net/projects/opengapps/files/";
-            webRequestMD5.Headers.Add("Accept-Encoding", "gzip, deflate, br");
-            webRequestMD5.Headers.Add("Accept-Language", "en-US,en;q=0.9");
-            webRequestMD5.Headers.Add("Upgrade-Insecure-Requests", "1");
-            using (WebClient md5download = new WebClient())
+            if (verifyChecksums)
             {
-                md5download.DownloadFileAsync(webRequestMD5.RequestUri, GappsPath + ".md5");
+                // Download MD5 hash
+                HttpWebRequest webRequestMD5 = (HttpWebRequest)WebRequest.Create(gappsMD5);
+                webRequestMD5.Method = "GET";
+                webRequestMD5.ContentType = "application/json";
+                webRequestMD5.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36";
+                webRequestMD5.Accept = "application/json";
+                // Trick sourceforge into thinking we're downloading from the site
+                webRequestMD5.Referer = "https://sourceforge.net/projects/opengapps/files/";
+                webRequestMD5.Headers.Add("Accept-Encoding", "gzip, deflate, br");
+                webRequestMD5.Headers.Add("Accept-Language", "en-US,en;q=0.9");
+                webRequestMD5.Headers.Add("Upgrade-Insecure-Requests", "1");
+                using (WebClient md5download = new WebClient())
+                {
+                    md5download.DownloadFileAsync(webRequestMD5.RequestUri, GappsPath + ".md5");
+                }
             }
         }
 
         private void Gapps_webClient_DownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
         {
-            label_processStatus.Text = String.Format("Verifying MD5 checksum...");
-            // Verify MD5 checksum
-            MD5 md5_verify = MD5.Create();
-            string Checksum;
-            using (FileStream stream = File.OpenRead(GappsPath))
+            if (verifyChecksums)
             {
-                byte[] checksum = md5_verify.ComputeHash(stream);
-                Checksum = BitConverter.ToString(checksum).Replace("-", string.Empty);
+                label_processStatus.Text = String.Format("Verifying MD5 checksum...");
+                if(!VerifyMD5(GappsPath))
+                {
+                    CloseWithError("Error preparing files. The MD5 checksum for the Gapps package did not match the one retrieved from the server.");
+                }
             }
-            Debug.WriteLine(Checksum);
         }
 
         private void Gapps_webClient_DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
@@ -192,8 +195,77 @@ namespace WsaGappsTool
             // Cancel
             if (MessageBox.Show("Are you sure you want to cancel?", "Cancel?", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
-                
+
             }
+        }
+
+        bool VerifyMD5(string file, string md5_file)
+        {
+            int md5_length = 32;
+
+            // Verify MD5 checksum
+            MD5 md5_verify = MD5.Create();
+            string CalculatedChecksum;
+            using (FileStream stream = File.OpenRead(GappsPath))
+            {
+                byte[] checksum = md5_verify.ComputeHash(stream);
+                CalculatedChecksum = BitConverter.ToString(checksum).Replace("-", string.Empty);
+            }
+            CalculatedChecksum = CalculatedChecksum.ToUpper(); // Make it upper case
+            // Debug.WriteLine(CalculatedChecksum);
+
+            // Read checksum from MD5 file
+            string fileChecksumString = "";
+            using (StreamReader reader = new StreamReader(md5_file))
+            {
+                fileChecksumString = reader.ReadToEnd().Substring(0, md5_length).ToUpper();
+            }
+            //Debug.WriteLine(fileChecksumString);
+
+            // fileChecksumString = fileChecksumString.Substring(0, md5_length).ToUpper();
+
+            // Determine the verdict...
+            if (fileChecksumString != CalculatedChecksum) return false; // File's checksum did not match expected
+            else return true; // All good!
+        }
+
+        bool VerifyMD5(string file)
+        {
+            int md5_length = 32;
+            string md5_file = file + ".md5";
+
+            // Verify MD5 checksum
+            MD5 md5_verify = MD5.Create();
+            string CalculatedChecksum;
+            using (FileStream stream = File.OpenRead(GappsPath))
+            {
+                byte[] checksum = md5_verify.ComputeHash(stream);
+                CalculatedChecksum = BitConverter.ToString(checksum).Replace("-", string.Empty);
+            }
+            CalculatedChecksum = CalculatedChecksum.ToUpper(); // Make it upper case
+            // Debug.WriteLine(CalculatedChecksum);
+
+            // Read checksum from MD5 file
+            string fileChecksumString = "";
+            using (StreamReader reader = new StreamReader(md5_file))
+            {
+                fileChecksumString = reader.ReadToEnd().Substring(0, md5_length).ToUpper();
+            }
+            //Debug.WriteLine(fileChecksumString);
+
+            // fileChecksumString = fileChecksumString.Substring(0, md5_length).ToUpper();
+
+            // Determine the verdict...
+            if (fileChecksumString != CalculatedChecksum) return false; // File's checksum did not match expected
+            else return true; // All good!
+        }
+
+        void CloseWithError(string message)
+        {
+            error = true;
+            errorMessage = message;
+            DialogResult = DialogResult.Abort;
+            Close();
         }
     }
 }

@@ -57,13 +57,14 @@
             // 
             // label_processStatus
             // 
-            this.label_processStatus.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.label_processStatus.AutoSize = true;
-            this.label_processStatus.Location = new System.Drawing.Point(12, 118);
+            this.label_processStatus.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.label_processStatus.Location = new System.Drawing.Point(12, 85);
             this.label_processStatus.Name = "label_processStatus";
-            this.label_processStatus.Size = new System.Drawing.Size(96, 16);
+            this.label_processStatus.Size = new System.Drawing.Size(626, 49);
             this.label_processStatus.TabIndex = 2;
             this.label_processStatus.Text = "Getting ready...";
+            this.label_processStatus.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
             this.label_processStatus.Click += new System.EventHandler(this.label_processStatus_Click);
             // 
             // button1
@@ -95,7 +96,6 @@
             this.Text = "Preparing files...";
             this.Load += new System.EventHandler(this.PrepareMsixAndGapps_Load);
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
