@@ -1,1 +1,0 @@
-qemu-system-x86_64.exe -no-user-config -display sdl -m 2048 -snapshot -boot d
