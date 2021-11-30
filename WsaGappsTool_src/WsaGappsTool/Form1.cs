@@ -36,7 +36,8 @@ namespace WsaGappsTool
         {
             if (MessageBox.Show("This process might take a while (~10-15 minutes). Are you sure you want to continue?", config.AppName, MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
-                // Run
+                PrepareMsixAndGapps prepareMsixAndGapps = new PrepareMsixAndGapps(textBox_msixPackagePath.Text, textBox_gappsPackagePath.Text);
+                DialogResult result = prepareMsixAndGapps.ShowDialog();
             }
         }
 
@@ -66,6 +67,67 @@ namespace WsaGappsTool
                 Close();
                 Application.Exit();
             }
+        }
+
+        void refreshSummaryLabel()
+        {
+            if (textBox_gappsPackagePath.TextLength < 1 && textBox_msixPackagePath.TextLength < 1)
+            {
+                summaryLabel.Text = "MSIX and Gapps will be downloaded";
+            }
+            else
+            {
+                if (textBox_gappsPackagePath.TextLength < 1)
+                {
+                    summaryLabel.Text = "Gapps will be downloaded";
+                }
+                else if (textBox_msixPackagePath.TextLength < 1)
+                {
+                    summaryLabel.Text = "MSIX will be downloaded";
+                }
+                else
+                {
+                    summaryLabel.Text = "";
+                }
+            }
+        }
+
+        private void textBox_msixPackagePath_TextChanged(object sender, EventArgs e)
+        {
+            refreshSummaryLabel();
+            CheckIfSpecifiedPathsExist();
+        }
+
+        private void textBox_gappsPackagePath_TextChanged(object sender, EventArgs e)
+        {
+            refreshSummaryLabel();
+            CheckIfSpecifiedPathsExist();
+        }
+
+        void CheckIfSpecifiedPathsExist()
+        {
+            if (textBox_msixPackagePath.TextLength != 0 && !File.Exists(textBox_msixPackagePath.Text))
+            {
+                msix_fileErrorLabel.Visible = true;
+            }
+            else
+            {
+                msix_fileErrorLabel.Visible = false;
+            }
+
+            if (textBox_gappsPackagePath.TextLength != 0 && !File.Exists(textBox_gappsPackagePath.Text))
+            {
+                gapps_fileErrorLabel.Visible = true;
+            }
+            else
+            {
+                gapps_fileErrorLabel.Visible = false;
+            }
+        }
+
+        private void backgroundWorker_checkIfFilesExist_DoWork(object sender, DoWorkEventArgs e)
+        {
+
         }
     }
 }

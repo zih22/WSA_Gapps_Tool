@@ -10,9 +10,12 @@ namespace WsaGappsTool
     {
         public static string AppName = "Wsa Gapps Tool";
 
-        public static string sevenZip_Ex = "tools/7z/7z.exe";
-        public static string qemu_Ex = "qemu/qemu-system-x86_64.exe";
+        public static string sevenZip_Ex = "../tools/7z/7z.exe";
+        public static string qemu_Ex = "../qemu/qemu-system-x86_64.exe";
+        public static string vm_dir = "../vm/";
 
         public static string CacheDirectory = "cache/";
+
+
     }
 }
