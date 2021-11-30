@@ -59,8 +59,8 @@ icacls data.vhdx /grant "Authenticated Users":(OI)(CI)M
 icacls data.vhdx /grant "everyone":(OI)(CI)M
 icacls data.vhdx /grant "domain\user":(OI)(CI)M
 
-echo Done!
-echo Double-click the VHDX file to mount it, then copy the WSA image files over to the mounted drive (should be called WSA_IMAGES). When you're done, right-click the mounted drive and click "Eject".
+echo An empty 8GB data.vmdk file has been created.
+echo Make sure to set up the folder structure as needed. For guidance, see the README.md file in the vm folder.
 
 cd %currentDir% > nul 2>&1
 
