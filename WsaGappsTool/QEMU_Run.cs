@@ -12,6 +12,9 @@ namespace WsaGappsTool
 {
     public partial class QEMU_Run : Form
     {
+        const string error_systemImagesNotFound = "System image(s) not found on data partition";
+        const string error_gappsNotFound = "Gapps not found on data partition";
+
         public QEMU_Run()
         {
             InitializeComponent();

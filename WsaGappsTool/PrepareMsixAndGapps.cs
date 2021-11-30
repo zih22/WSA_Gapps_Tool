@@ -61,6 +61,7 @@ namespace WsaGappsTool
 
         void DownloadGapps()
         {
+            label_processStatus.Text = "Downloading gapps package...";
             // Download latest Android 11 arm64 gapps
             string gappsUri = "https://api.opengapps.org/list";
             string androidVersion = "11.0";
@@ -91,7 +92,7 @@ namespace WsaGappsTool
             JsonElement gappsElement = gappsJsonElement.GetProperty("archs").GetProperty(arch).GetProperty("apis").GetProperty(androidVersion).GetProperty("variants");
             JsonElement gappsEntry = gappsElement.EnumerateArray().First();
             string gappsUrl = gappsEntry.GetProperty("url").GetString();
-            
+            Debug.WriteLine(gappsUrl);
         }
     }
 }

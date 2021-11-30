@@ -91,7 +91,7 @@
             this.MinimizeBox = false;
             this.Name = "PrepareMsixAndGapps";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Preparing MSIX package...";
+            this.Text = "Preparing files...";
             this.Load += new System.EventHandler(this.PrepareMsixAndGapps_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
