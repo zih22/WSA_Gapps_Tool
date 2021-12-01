@@ -422,46 +422,9 @@ namespace WsaGappsTool
                     label_processStatus.Text = String.Format("Deleting...");
                     File.Delete(config.vm_dataDiskImage);
                 }
-                label_processStatus.Text = String.Format("Creating new data image...");
-                Process.Start(config.sevenZip_Ex, "x ..\\vm\\data\\data.7z.001 -o\"..\vm\\\"");
-                // label_processStatus.Text = String.Format("Mounting data image...");
-                // // Mount the data image using DISKPART
-                // string command_args = String.Format("select vdisk file=\"{0}\"\nattach vdisk\nassign\nexit", Path.GetFullPath(config.vm_dataDiskImage));
-                // Process.Start("diskpart.exe", command_args);
-                // // Wait for the process to finish
-                // while (Process.GetProcessesByName("diskpart").Length > 0)
-                // {
-                //     Thread.Sleep(100);
-                // }
-                // // Find new drive mountpoint
-                // string driveMountpoint = "";
-                // DriveInfo[] drives = DriveInfo.GetDrives();
-                // foreach (DriveInfo drive in drives)
-                // {
-                //     if (drive.VolumeLabel == config.vm_dataDiskImage_MountedVolumeName)
-                //     {
-                //         driveMountpoint = drive.Name;
-                //         break;
-                //     }
-                // }
-                // if (driveMountpoint == "")
-                // {
-                //     CloseWithError("Could not find the drive mountpoint for the data image.");
-                // }
-                // // Remove backslash from the end of the mountpoint
-                // if (driveMountpoint.EndsWith("\\"))
-                // {
-                //     driveMountpoint = driveMountpoint.Substring(0, driveMountpoint.Length - 1);
-                // }
-                // string image_dPath = String.Format("{0}\\{1}\\", driveMountpoint, "img");
-                // string gapps_dPath = String.Format("{0}\\{1}\\", driveMountpoint, "gapps");
-                // label_processStatus.Text = String.Format("Copying files...");
-                // // Copy gapps.zip to the data image
-                // File.Copy(GappsPath, String.Format("{0}\\{1}", image_dPath, "gapps.zip"), true);
-
-                //DiscUtils.DiskImageBuilder
-
-               
+                // label_processStatus.Text = String.Format("Creating new data image...");
+                // Process.Start(config.sevenZip_Ex, "x ..\\vm\\data\\data.7z.001 -o\"..\vm\\\"")
+                label_processStatus.Text = String.Format("Creating data image with contents...");
             }
         }
 

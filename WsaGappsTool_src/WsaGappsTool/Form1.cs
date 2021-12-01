@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using WsaGappsTool;
+using WsaGappsTool.VhdxHelper;
 
 namespace WsaGappsTool
 {
@@ -17,6 +18,7 @@ namespace WsaGappsTool
         public Form1()
         {
             InitializeComponent();
+            //VhdxBuilder.CreateFromDirectory("cache", "data.vhdx", "test", 500).Close();
         }
 
         private void Form1_Load(object sender, EventArgs e)
