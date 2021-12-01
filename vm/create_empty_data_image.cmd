@@ -36,7 +36,7 @@ echo attach vdisk
 echo detail vdisk
 echo convert mbr
 echo create partition primary
-echo format fs=fat32 label=wsa_images quick
+echo format fs=fat32 label=wsa_files quick
 echo assign
 echo detach vdisk
 echo exit) | diskpart > nul 2>&1

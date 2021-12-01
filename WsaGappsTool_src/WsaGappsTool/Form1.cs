@@ -26,7 +26,7 @@ namespace WsaGappsTool
 
         private void automaticInstallationToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if(MessageBox.Show("The automatic installation feature downloads both the WSA .msix package and the latest gapps package, then automatically begins the modification process. \n\nThis feature is experimental, and therefore may not operate as intended. \n\nWould you like to continue anyway?", "Automatic installation", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            if (MessageBox.Show("The automatic installation feature downloads both the WSA .msix package and the latest gapps package, then automatically begins the modification process. \n\nThis feature is experimental, and therefore may not operate as intended. \n\nWould you like to continue anyway?", "Automatic installation", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
                 // Run
             }
@@ -34,10 +34,17 @@ namespace WsaGappsTool
 
         private void button5_Click(object sender, EventArgs e)
         {
-            if (MessageBox.Show("This process might take a while (~10-15 minutes). Are you sure you want to continue?", config.AppName, MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            //string message = "This process might take a while (~10-15 minutes). Are you sure you want to continue?";
+            string message = "This process might take a while. Continue?";
+            if (MessageBox.Show(message, config.AppName, MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
                 PrepareMsixAndGapps prepareMsixAndGapps = new PrepareMsixAndGapps(textBox_msixPackagePath.Text, textBox_gappsPackagePath.Text);
                 DialogResult result = prepareMsixAndGapps.ShowDialog();
+                if (result == DialogResult.Abort && prepareMsixAndGapps.error)
+                {
+                    MessageBox.Show(String.Format("Error preparing: {0}", prepareMsixAndGapps.errorMessage), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    Directory.Delete(config.CacheDirectory, true);
+                }
             }
         }
 
@@ -50,7 +57,7 @@ namespace WsaGappsTool
         {
             bool error = false;
 
-            if(!File.Exists(config.sevenZip_Ex))
+            if (!File.Exists(config.sevenZip_Ex))
             {
                 MessageBox.Show(String.Format("7z executable could not be found at the expected path: {0}", config.sevenZip_Ex));
                 error = true;
@@ -62,7 +69,7 @@ namespace WsaGappsTool
                 error = true;
             }
 
-            if(error)
+            if (error)
             {
                 Close();
                 Application.Exit();

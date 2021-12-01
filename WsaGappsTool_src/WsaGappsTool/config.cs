@@ -13,9 +13,10 @@ namespace WsaGappsTool
         public static string sevenZip_Ex = "../tools/7z/7z.exe";
         public static string qemu_Ex = "../qemu/qemu-system-x86_64.exe";
         public static string vm_dir = "../vm/";
+        public static string vm_dataDiskImage = vm_dir + "data.vhdx";
+
+        public static string vm_dataDiskImage_MountedVolumeName = "WSA_FILES";
 
         public static string CacheDirectory = "cache/";
-
-
     }
 }

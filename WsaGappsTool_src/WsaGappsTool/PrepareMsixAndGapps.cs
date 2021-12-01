@@ -13,12 +13,23 @@ using System.IO;
 using System.Text.Json;
 using System.Diagnostics;
 using System.Security.Cryptography;
+using System.Collections;
+using System.Text.RegularExpressions;
+using System.Threading;
+using ICSharpCode;
+using ICSharpCode.SharpZipLib;
+using DiscUtils;
+using DiscUtils.Vhdx;
+using DiscUtils.Fat;
 
 namespace WsaGappsTool
 {
     public partial class PrepareMsixAndGapps : Form
     {
+        bool downloadStatusToShow = false; // false for Gapps; true for MSIX
+
         HttpWebRequest webRequest;
+        HttpWebRequest webRequest2;
         WebClient gapps_webClient;
         WebClient msix_webClient;
 
@@ -45,6 +56,7 @@ namespace WsaGappsTool
             if (msixPath == null || msixPath == "")
             {
                 downloadMsix = true;
+                MsixPath = config.CacheDirectory + "wsa.msix";
             }
 
             if (gappsPath == null || gappsPath == "")
@@ -68,33 +80,26 @@ namespace WsaGappsTool
         {
             if (downloadGapps)
             {
-                DownloadGapps();
-                //try
-                //{
-                //    DownloadGapps();
-                //}
-                //catch
-                //{
-                //    error = true;
-                //    errorMessage = "Could not download Gapps package. An unknown error occurred.";
-                //    DialogResult = DialogResult.Abort;
-                //    Close();
-                //}
+                try
+                {
+                    DownloadGapps();
+                }
+                catch
+                {
+                    CloseWithError("Could not download Gapps package. An unknown error occurred.");
+                }
             }
-            // if (downloadMsix)
-            // {
-            //     try
-            //     {
-            //         DownloadGapps();
-            //     }
-            //     catch
-            //     {
-            //         error = true;
-            //         errorMessage = "Could not download Gapps package. An unknown error occurred.";
-            //         DialogResult = DialogResult.Abort;
-            //         Close();
-            //     }
-            // }
+            if (downloadMsix)
+            {
+                try
+                {
+                    DownloadMsix();
+                }
+                catch
+                {
+                    CloseWithError("Could not download MSIX package. An unknown error occurred.");
+                }
+            }
         }
 
         void DownloadGapps()
@@ -127,15 +132,13 @@ namespace WsaGappsTool
             // Parse the json with JsonDocument
             JsonDocument gappsJsonDoc = JsonDocument.Parse(gappsJson);
             JsonElement gappsJsonElement = gappsJsonDoc.RootElement;
-            // Get the latest gapps for android 11; x86-64
             JsonElement gappsElement = gappsJsonElement.GetProperty("archs").GetProperty(arch).GetProperty("apis").GetProperty(androidVersion).GetProperty("variants"); // Get the list of the latest releases for android 11; x86-64
             JsonElement gappsVariantElement = gappsElement.EnumerateArray().ElementAt(0); // Get pico archive (first entry should always be pico)
-            string gappsUrl = gappsVariantElement.GetProperty("zip").GetString(); // Download URL for zip
+            string gappsDownloadUrl = gappsVariantElement.GetProperty("zip").GetString(); // Download URL for zip
             string gappsMD5 = gappsVariantElement.GetProperty("md5").GetString(); // Download URL for MD5 hash
-            //Debug.WriteLine(gappsUrl);
 
             // Download the gapps package
-            webRequest = (HttpWebRequest)WebRequest.Create(gappsUrl);
+            webRequest = (HttpWebRequest)WebRequest.Create(gappsDownloadUrl);
             webRequest.Method = "GET";
             webRequest.ContentType = "application/json";
             webRequest.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36";
@@ -172,22 +175,104 @@ namespace WsaGappsTool
             }
         }
 
-        private void Gapps_webClient_DownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
+        void DownloadMsix()
         {
-            if (verifyChecksums)
+            label_processStatus.Text = "Preparing to download MSIX package...";
+            string msixUri = "https://store.rg-adguard.net/api/GetFiles";
+            string arch = "x64";
+            string lineToSearchFor = "<tr style=\".*?\"><td><a href=\"(?<url>.*?)\" rel=\"noreferrer\">MicrosoftCorporationII\\.WindowsSubsystemForAndroid_[^<]+\\.msixbundle</a></td>.+</tr>";
+
+            Hashtable parameters = new Hashtable()
             {
-                label_processStatus.Text = String.Format("Verifying MD5 checksum...");
-                if(!VerifyMD5(GappsPath))
+                {"type", "ProductId"},
+                {"url", "9P3395VX91NR"},
+                {"ring", "WIS"},
+                {"lang", "en_US"}
+            };
+
+            webRequest2 = (HttpWebRequest)WebRequest.Create(msixUri);
+            webRequest2.Method = "POST";
+            webRequest2.ContentType = "application/x-www-form-urlencoded";
+
+            // Set body
+            using (StreamWriter streamWriter = new StreamWriter(webRequest2.GetRequestStream()))
+            {
+                foreach (DictionaryEntry entry in parameters)
                 {
-                    CloseWithError("Error preparing files. The MD5 checksum for the Gapps package did not match the one retrieved from the server.");
+                    streamWriter.Write(entry.Key + "=" + entry.Value + "&");
                 }
+                //streamWriter.Write(String.Join("&", parameters.OfType<DictionaryEntry>().Select(de => String.Format("{0}={1}", de.Key, de.Value))));
+                streamWriter.Flush();
+                streamWriter.Close();
+            }
+            HttpWebResponse httpWebResponse = (HttpWebResponse)webRequest2.GetResponse();
+            string responseData = new StreamReader(httpWebResponse.GetResponseStream()).ReadToEnd();
+            Debug.WriteLine(String.Format("Data: {0}", responseData));
+            Debug.WriteLine(String.Format("Type: {0}", httpWebResponse.ContentType));
+
+            // Filter out the msixbundle link
+            Match match = Regex.Match(responseData, lineToSearchFor);
+            string msixUrl = match.Groups["url"].Value;
+            Debug.WriteLine(String.Format("MSIX URL: {0}", msixUrl));
+
+            // Download .msix
+            msix_webClient = new WebClient();
+            msix_webClient.DownloadFileCompleted += Msix_webClient_DownloadFileCompleted;
+            msix_webClient.DownloadProgressChanged += Msix_webClient_DownloadProgressChanged;
+            msix_webClient.DownloadFileAsync(new Uri(msixUrl), MsixPath);
+        }
+
+        private void Msix_webClient_DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
+        {
+            if (gapps_webClient.IsBusy && msix_webClient.IsBusy)
+            {
+                if (downloadStatusToShow == true)
+                {
+                    label_processStatus.Text = String.Format("Downloading WSA MSIX package ({0} bytes / {1} bytes)...", e.BytesReceived, e.TotalBytesToReceive);
+                    progressBar1.Value = e.ProgressPercentage;
+                }
+            }
+            else
+            {
+                label_processStatus.Text = String.Format("Downloading WSA MSIX package ({0} bytes / {1} bytes)...", e.BytesReceived, e.TotalBytesToReceive);
+                progressBar1.Value = e.ProgressPercentage;
             }
         }
 
         private void Gapps_webClient_DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
         {
-            label_processStatus.Text = String.Format("Downloading gapps package ({0} bytes / {1} bytes)...", e.BytesReceived, e.TotalBytesToReceive);
-            progressBar1.Value = e.ProgressPercentage;
+            if (gapps_webClient.IsBusy && msix_webClient.IsBusy)
+            {
+                if (downloadStatusToShow == false)
+                {
+                    label_processStatus.Text = String.Format("Downloading gapps package ({0} bytes / {1} bytes)...", e.BytesReceived, e.TotalBytesToReceive);
+                    progressBar1.Value = e.ProgressPercentage;
+                }
+            }
+            else
+            {
+                label_processStatus.Text = String.Format("Downloading gapps package ({0} bytes / {1} bytes)...", e.BytesReceived, e.TotalBytesToReceive);
+                progressBar1.Value = e.ProgressPercentage;
+            }
+        }
+
+        private void Msix_webClient_DownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
+        {
+            PrepareFiles();
+        }
+
+        private void Gapps_webClient_DownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
+        {
+            if (verifyChecksums)
+            {
+                label_processStatus.Text = String.Format("Verifying MD5 checksum for gapps.zip...");
+                if (!VerifyMD5(GappsPath))
+                {
+                    CloseWithError("Error preparing files. The MD5 checksum for the Gapps package did not match the one retrieved from the server.");
+                }
+            }
+
+            PrepareFiles();
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -195,7 +280,7 @@ namespace WsaGappsTool
             // Cancel
             if (MessageBox.Show("Are you sure you want to cancel?", "Cancel?", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
-
+                CloseWithError("Process cancelled.");
             }
         }
 
@@ -262,10 +347,127 @@ namespace WsaGappsTool
 
         void CloseWithError(string message)
         {
+            // if(gapps_webClient != null && gapps_webClient.IsBusy)
+            // {
+            //     gapps_webClient.CancelAsync();
+            //     gapps_webClient.Dispose();
+            // }
+            // if (msix_webClient != null && msix_webClient.IsBusy)
+            // {
+            //     msix_webClient.CancelAsync();
+            //     msix_webClient.Dispose();
+            // }
             error = true;
             errorMessage = message;
             DialogResult = DialogResult.Abort;
             Close();
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            downloadStatusToShow = !downloadStatusToShow;
+        }
+
+        void PrepareFiles()
+        {
+            if (!(gapps_webClient.IsBusy || msix_webClient.IsBusy))
+            {
+                // Extract msix to temp folder in cache
+                label_processStatus.Text = "Extracting MSIX package...";
+                // // Use 7zip to extract, and get progress from stdout
+                // ProcessStartInfo startInfo = new ProcessStartInfo();
+                // startInfo.FileName = config.sevenZip_Ex;
+                // startInfo.Arguments = "x -y -o" + config.CacheDirectory + "msix/" + " \"" + Path.GetFullPath(MsixPath) + "\"";
+                // startInfo.UseShellExecute = true;
+                // //startInfo.RedirectStandardOutput = true;
+                // //startInfo.RedirectStandardError = true;
+                // startInfo.CreateNoWindow = false;
+                // Process extractor = new Process();
+                // extractor.StartInfo = startInfo;
+                // extractor.Start();
+                // extractor.WaitForExit();
+
+                // // Create listener to continuously read stdout, and parse percentage
+                // string line;
+                // while ((line = extractor.StandardOutput.ReadLine()) != null)
+                // {
+                //     if (line.Contains("%"))
+                //     {
+                //         int percentage = int.Parse(line.Substring(0, line.IndexOf("%")));
+                //         progressBar1.Value = percentage;
+                //     }
+                // }
+
+                // Extract using SharpZipLib
+
+                ICSharpCode.SharpZipLib.Zip.FastZip fastZip = new ICSharpCode.SharpZipLib.Zip.FastZip();
+                fastZip.ExtractZip(MsixPath, config.CacheDirectory + "msix/", "*");
+
+                // Look for package that contains x64 in title using match regex
+                string[] files = Directory.GetFiles(config.CacheDirectory + "msix/", "*.msix");
+                string x64_package = "";
+                foreach (string file in files)
+                {
+                    if (Regex.IsMatch(file, @"\bx64\b", RegexOptions.IgnoreCase))
+                    {
+                        x64_package = file;
+                        break;
+                    }
+                }
+                Debug.WriteLine("x64 package: " + x64_package);
+
+                label_processStatus.Text = String.Format("Checking for existing data image...");
+                if (File.Exists(config.vm_dataDiskImage))
+                {
+                    label_processStatus.Text = String.Format("Deleting...");
+                    File.Delete(config.vm_dataDiskImage);
+                }
+                label_processStatus.Text = String.Format("Creating new data image...");
+                Process.Start(config.sevenZip_Ex, "x ..\\vm\\data\\data.7z.001 -o\"..\vm\\\"");
+                // label_processStatus.Text = String.Format("Mounting data image...");
+                // // Mount the data image using DISKPART
+                // string command_args = String.Format("select vdisk file=\"{0}\"\nattach vdisk\nassign\nexit", Path.GetFullPath(config.vm_dataDiskImage));
+                // Process.Start("diskpart.exe", command_args);
+                // // Wait for the process to finish
+                // while (Process.GetProcessesByName("diskpart").Length > 0)
+                // {
+                //     Thread.Sleep(100);
+                // }
+                // // Find new drive mountpoint
+                // string driveMountpoint = "";
+                // DriveInfo[] drives = DriveInfo.GetDrives();
+                // foreach (DriveInfo drive in drives)
+                // {
+                //     if (drive.VolumeLabel == config.vm_dataDiskImage_MountedVolumeName)
+                //     {
+                //         driveMountpoint = drive.Name;
+                //         break;
+                //     }
+                // }
+                // if (driveMountpoint == "")
+                // {
+                //     CloseWithError("Could not find the drive mountpoint for the data image.");
+                // }
+                // // Remove backslash from the end of the mountpoint
+                // if (driveMountpoint.EndsWith("\\"))
+                // {
+                //     driveMountpoint = driveMountpoint.Substring(0, driveMountpoint.Length - 1);
+                // }
+                // string image_dPath = String.Format("{0}\\{1}\\", driveMountpoint, "img");
+                // string gapps_dPath = String.Format("{0}\\{1}\\", driveMountpoint, "gapps");
+                // label_processStatus.Text = String.Format("Copying files...");
+                // // Copy gapps.zip to the data image
+                // File.Copy(GappsPath, String.Format("{0}\\{1}", image_dPath, "gapps.zip"), true);
+
+                //DiscUtils.DiskImageBuilder
+
+               
+            }
+        }
+
+        private void Extractor_OutputDataReceived(object sender, DataReceivedEventArgs e)
+        {
+
         }
     }
 }
