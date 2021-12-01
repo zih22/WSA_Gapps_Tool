@@ -18,9 +18,6 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using ICSharpCode;
 using ICSharpCode.SharpZipLib;
-using DiscUtils;
-using DiscUtils.Vhdx;
-using DiscUtils.Fat;
 
 namespace WsaGappsTool
 {
@@ -43,6 +40,7 @@ namespace WsaGappsTool
 
         string MsixPath = "";
         string GappsPath = "";
+        private bool closing = false;
 
         public PrepareMsixAndGapps()
         {
@@ -78,6 +76,8 @@ namespace WsaGappsTool
 
         private void PrepareMsixAndGapps_Load(object sender, EventArgs e)
         {
+            msix_webClient = new WebClient();
+            gapps_webClient = new WebClient();
             if (downloadGapps)
             {
                 try
@@ -150,7 +150,6 @@ namespace WsaGappsTool
             webRequest.Headers.Add("Upgrade-Insecure-Requests", "1");
 
             // Start downloading
-            gapps_webClient = new WebClient();
             gapps_webClient.DownloadProgressChanged += Gapps_webClient_DownloadProgressChanged;
             gapps_webClient.DownloadFileCompleted += Gapps_webClient_DownloadFileCompleted;
             gapps_webClient.DownloadFileAsync(webRequest.RequestUri, GappsPath);
@@ -216,7 +215,6 @@ namespace WsaGappsTool
             Debug.WriteLine(String.Format("MSIX URL: {0}", msixUrl));
 
             // Download .msix
-            msix_webClient = new WebClient();
             msix_webClient.DownloadFileCompleted += Msix_webClient_DownloadFileCompleted;
             msix_webClient.DownloadProgressChanged += Msix_webClient_DownloadProgressChanged;
             msix_webClient.DownloadFileAsync(new Uri(msixUrl), MsixPath);
@@ -258,21 +256,34 @@ namespace WsaGappsTool
 
         private void Msix_webClient_DownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
         {
-            PrepareFiles();
+            if (e.Cancelled || e.Error != null || closing == true)
+            {
+
+            }
+            else
+            {
+                PrepareFiles();
+            }
         }
 
         private void Gapps_webClient_DownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
         {
-            if (verifyChecksums)
+            if (e.Cancelled || e.Error != null || closing == true)
             {
-                label_processStatus.Text = String.Format("Verifying MD5 checksum for gapps.zip...");
-                if (!VerifyMD5(GappsPath))
-                {
-                    CloseWithError("Error preparing files. The MD5 checksum for the Gapps package did not match the one retrieved from the server.");
-                }
-            }
 
-            PrepareFiles();
+            }
+            else
+            {
+                if (verifyChecksums)
+                {
+                    label_processStatus.Text = String.Format("Verifying MD5 checksum for gapps.zip...");
+                    if (!VerifyMD5(GappsPath))
+                    {
+                        CloseWithError("Error preparing files. The MD5 checksum for the Gapps package did not match the one retrieved from the server.");
+                    }
+                }
+                PrepareFiles();
+            }
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -347,16 +358,17 @@ namespace WsaGappsTool
 
         void CloseWithError(string message)
         {
-            // if(gapps_webClient != null && gapps_webClient.IsBusy)
-            // {
-            //     gapps_webClient.CancelAsync();
-            //     gapps_webClient.Dispose();
-            // }
-            // if (msix_webClient != null && msix_webClient.IsBusy)
-            // {
-            //     msix_webClient.CancelAsync();
-            //     msix_webClient.Dispose();
-            // }
+            closing = true;
+            if(gapps_webClient != null)
+            {
+                gapps_webClient.CancelAsync();
+                gapps_webClient.Dispose();
+            }
+            if (msix_webClient != null)
+            {
+                msix_webClient.CancelAsync();
+                msix_webClient.Dispose();
+            }
             error = true;
             errorMessage = message;
             DialogResult = DialogResult.Abort;

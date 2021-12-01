@@ -41,10 +41,9 @@
             this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(10, 7);
-            this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label1.Location = new System.Drawing.Point(13, 9);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(469, 37);
+            this.label1.Size = new System.Drawing.Size(625, 46);
             this.label1.TabIndex = 0;
             this.label1.Text = "Preparing files...";
             this.label1.TextAlign = System.Drawing.ContentAlignment.TopCenter;
@@ -53,20 +52,19 @@
             // 
             this.progressBar1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.progressBar1.Location = new System.Drawing.Point(9, 110);
-            this.progressBar1.Margin = new System.Windows.Forms.Padding(2);
+            this.progressBar1.Location = new System.Drawing.Point(12, 159);
+            this.progressBar1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(410, 23);
+            this.progressBar1.Size = new System.Drawing.Size(547, 28);
             this.progressBar1.TabIndex = 1;
             // 
             // label_processStatus
             // 
             this.label_processStatus.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.label_processStatus.Location = new System.Drawing.Point(11, 63);
-            this.label_processStatus.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label_processStatus.Location = new System.Drawing.Point(15, 102);
             this.label_processStatus.Name = "label_processStatus";
-            this.label_processStatus.Size = new System.Drawing.Size(466, 40);
+            this.label_processStatus.Size = new System.Drawing.Size(621, 49);
             this.label_processStatus.TabIndex = 2;
             this.label_processStatus.Text = "Getting ready...";
             this.label_processStatus.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
@@ -75,10 +73,10 @@
             // button1
             // 
             this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button1.Location = new System.Drawing.Point(423, 110);
-            this.button1.Margin = new System.Windows.Forms.Padding(2);
+            this.button1.Location = new System.Drawing.Point(564, 159);
+            this.button1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(56, 23);
+            this.button1.Size = new System.Drawing.Size(75, 28);
             this.button1.TabIndex = 3;
             this.button1.Text = "Cancel";
             this.button1.UseVisualStyleBackColor = true;
@@ -87,21 +85,21 @@
             // timer1
             // 
             this.timer1.Enabled = true;
-            this.timer1.Interval = 2000;
+            this.timer1.Interval = 3000;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
             // PrepareMsixAndGapps
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(488, 142);
+            this.ClientSize = new System.Drawing.Size(651, 198);
             this.ControlBox = false;
             this.Controls.Add(this.button1);
             this.Controls.Add(this.label_processStatus);
             this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.label1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
-            this.Margin = new System.Windows.Forms.Padding(2);
+            this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "PrepareMsixAndGapps";

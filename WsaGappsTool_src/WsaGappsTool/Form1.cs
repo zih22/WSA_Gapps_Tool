@@ -45,7 +45,14 @@ namespace WsaGappsTool
                 if (result == DialogResult.Abort && prepareMsixAndGapps.error)
                 {
                     MessageBox.Show(String.Format("Error preparing: {0}", prepareMsixAndGapps.errorMessage), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    Directory.Delete(config.CacheDirectory, true);
+                    try
+                    {
+                        //Directory.Delete(config.CacheDirectory, true);
+                    }
+                    catch (Exception ex)
+                    {
+
+                    }
                 }
             }
         }
