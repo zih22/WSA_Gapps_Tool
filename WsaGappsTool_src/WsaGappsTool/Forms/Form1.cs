@@ -37,7 +37,7 @@ namespace WsaGappsTool
             }
         }
 
-        private void button5_Click(object sender, EventArgs e)
+        private void startButton_Click(object sender, EventArgs e)
         {
             //string message = "This process might take a while (~10-15 minutes). Are you sure you want to continue?";
             string message = "This process might take a while. Continue?";
