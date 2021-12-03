@@ -329,7 +329,7 @@ namespace WsaGappsTool.VhdxHelper
                 FilesystemOperationCompleteEventArgs filesystemOperationCompleteEventArgs = new FilesystemOperationCompleteEventArgs(FilesystemOperation.AddFile, TargetPathOnImage, failed);
                 OnFilesystemOperationComplete(filesystemOperationCompleteEventArgs);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 failed = true;
                 FileAddCompleteEventArgs fileAddCompleteEventArgs = new FileAddCompleteEventArgs(SourceFile, TargetPathOnImage, 0, failed);
@@ -350,7 +350,7 @@ namespace WsaGappsTool.VhdxHelper
             {
                 fs.DeleteFile(FilePath);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 failed = true;
             }
@@ -393,7 +393,7 @@ namespace WsaGappsTool.VhdxHelper
                 FilesystemOperationCompleteEventArgs filesystemOperationCompleteEventArgs = new FilesystemOperationCompleteEventArgs(FilesystemOperation.DeleteDirectory, DirectoryPath, false);
                 OnFilesystemOperationComplete(filesystemOperationCompleteEventArgs);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw new DirectoryNotEmptyException(DirectoryPath);
             }

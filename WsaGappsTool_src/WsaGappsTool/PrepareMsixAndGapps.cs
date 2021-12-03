@@ -16,8 +16,6 @@ using System.Security.Cryptography;
 using System.Collections;
 using System.Text.RegularExpressions;
 using System.Threading;
-using ICSharpCode;
-using ICSharpCode.SharpZipLib;
 
 namespace WsaGappsTool
 {
@@ -30,11 +28,13 @@ namespace WsaGappsTool
         WebClient gapps_webClient;
         WebClient msix_webClient;
 
-        bool verifyChecksums = false;
+        bool verifyChecksums = false; // Set to true to perform checks of Gapps package after downlaoding
 
+        // Variables intended for access by the parent form
         public string errorMessage = "";
         public bool error = false;
 
+        // Determined by whether input arguments are null or not
         bool downloadMsix = false;
         bool downloadGapps = false;
 
@@ -56,11 +56,19 @@ namespace WsaGappsTool
                 downloadMsix = true;
                 MsixPath = config.CacheDirectory + "wsa.msix";
             }
+            else
+            {
+                MsixPath = msixPath;
+            }
 
             if (gappsPath == null || gappsPath == "")
             {
                 downloadGapps = true;
                 GappsPath = config.CacheDirectory + "gapps.zip";
+            }
+            else
+            {
+                GappsPath = gappsPath;
             }
 
             if (!Directory.Exists(config.CacheDirectory))
@@ -78,27 +86,34 @@ namespace WsaGappsTool
         {
             msix_webClient = new WebClient();
             gapps_webClient = new WebClient();
-            if (downloadGapps)
+            if (downloadGapps || downloadMsix)
             {
-                try
+                if (downloadGapps)
                 {
-                    DownloadGapps();
+                    try
+                    {
+                        DownloadGapps();
+                    }
+                    catch
+                    {
+                        CloseWithError("Could not download Gapps package. An unknown error occurred.");
+                    }
                 }
-                catch
+                if (downloadMsix)
                 {
-                    CloseWithError("Could not download Gapps package. An unknown error occurred.");
+                    try
+                    {
+                        DownloadMsix();
+                    }
+                    catch
+                    {
+                        CloseWithError("Could not download MSIX package. An unknown error occurred.");
+                    }
                 }
             }
-            if (downloadMsix)
+            else
             {
-                try
-                {
-                    DownloadMsix();
-                }
-                catch
-                {
-                    CloseWithError("Could not download MSIX package. An unknown error occurred.");
-                }
+                PrepareFiles();
             }
         }
 
@@ -359,7 +374,7 @@ namespace WsaGappsTool
         void CloseWithError(string message)
         {
             closing = true;
-            if(gapps_webClient != null)
+            if (gapps_webClient != null)
             {
                 gapps_webClient.CancelAsync();
                 gapps_webClient.Dispose();
@@ -386,6 +401,8 @@ namespace WsaGappsTool
             {
                 // Extract msix to temp folder in cache
                 label_processStatus.Text = "Extracting MSIX package...";
+                progressBar1.Style = ProgressBarStyle.Marquee;
+
                 // // Use 7zip to extract, and get progress from stdout
                 // ProcessStartInfo startInfo = new ProcessStartInfo();
                 // startInfo.FileName = config.sevenZip_Ex;
@@ -411,16 +428,20 @@ namespace WsaGappsTool
                 // }
 
                 // Extract using SharpZipLib
-
+                string msixExtractPath = config.CacheDirectory + "msix/";
                 ICSharpCode.SharpZipLib.Zip.FastZip fastZip = new ICSharpCode.SharpZipLib.Zip.FastZip();
-                fastZip.ExtractZip(MsixPath, config.CacheDirectory + "msix/", "*");
+                if (!Directory.Exists(msixExtractPath))
+                {
+                    Directory.CreateDirectory(msixExtractPath);
+                }
+                fastZip.ExtractZip(MsixPath, msixExtractPath, @"\bx64\b");
 
                 // Look for package that contains x64 in title using match regex
-                string[] files = Directory.GetFiles(config.CacheDirectory + "msix/", "*.msix");
+                string[] files = Directory.GetFiles(msixExtractPath, "*.msix");
                 string x64_package = "";
                 foreach (string file in files)
                 {
-                    if (Regex.IsMatch(file, @"\bx64\b", RegexOptions.IgnoreCase))
+                    if (Regex.IsMatch(Path.GetFileName(file), @"\bx64\b", RegexOptions.IgnoreCase))
                     {
                         x64_package = file;
                         break;
@@ -439,11 +460,6 @@ namespace WsaGappsTool
                 label_processStatus.Text = String.Format("Creating data image with contents...");
 
             }
-        }
-
-        private void Extractor_OutputDataReceived(object sender, DataReceivedEventArgs e)
-        {
-
         }
     }
 }

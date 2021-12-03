@@ -49,7 +49,7 @@ namespace WsaGappsTool
                     {
                         //Directory.Delete(config.CacheDirectory, true);
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
 
                     }
@@ -120,11 +120,13 @@ namespace WsaGappsTool
             CheckIfSpecifiedPathsExist();
         }
 
-        void CheckIfSpecifiedPathsExist()
+        bool CheckIfSpecifiedPathsExist()
         {
+            bool finalValue = true;
             if (textBox_msixPackagePath.TextLength != 0 && !File.Exists(textBox_msixPackagePath.Text))
             {
                 msix_fileErrorLabel.Visible = true;
+                finalValue = false;
             }
             else
             {
@@ -138,10 +140,33 @@ namespace WsaGappsTool
             else
             {
                 gapps_fileErrorLabel.Visible = false;
+                finalValue = false;
+            }
+            return finalValue;
+        }
+
+        private void button_browseForMsixPackage_Click(object sender, EventArgs e)
+        {
+            if (msixPackage_openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                textBox_msixPackagePath.Text = msixPackage_openFileDialog.FileName;
             }
         }
 
-        private void backgroundWorker_checkIfFilesExist_DoWork(object sender, DoWorkEventArgs e)
+        private void button_browseForGappsPackage_Click(object sender, EventArgs e)
+        {
+            if (gappsPackage_openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                textBox_gappsPackagePath.Text = gappsPackage_openFileDialog.FileName;
+            }
+        }
+
+        private void msixPackage_openFileDialog_FileOk(object sender, CancelEventArgs e)
+        {
+
+        }
+
+        private void gappsPackage_openFileDialog_FileOk(object sender, CancelEventArgs e)
         {
 
         }
