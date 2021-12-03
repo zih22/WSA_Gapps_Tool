@@ -212,6 +212,7 @@
             this.automaticInstallationToolStripMenuItem.Name = "automaticInstallationToolStripMenuItem";
             this.automaticInstallationToolStripMenuItem.Size = new System.Drawing.Size(191, 22);
             this.automaticInstallationToolStripMenuItem.Text = "Automatic installation";
+            this.automaticInstallationToolStripMenuItem.Visible = false;
             this.automaticInstallationToolStripMenuItem.Click += new System.EventHandler(this.automaticInstallationToolStripMenuItem_Click);
             // 
             // toolStripSeparator2

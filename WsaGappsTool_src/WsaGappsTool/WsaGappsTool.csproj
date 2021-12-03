@@ -218,6 +218,11 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="Paths.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Paths.resx</DependentUpon>
+    </Compile>
     <Compile Include="PrepareMsixAndGapps.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -244,6 +249,11 @@
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Paths.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Paths.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="PrepareMsixAndGapps.resx">
       <DependentUpon>PrepareMsixAndGapps.cs</DependentUpon>
     </EmbeddedResource>
@@ -262,6 +272,7 @@
     <EmbeddedResource Include="Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <None Include="..\.editorconfig">
       <Link>.editorconfig</Link>

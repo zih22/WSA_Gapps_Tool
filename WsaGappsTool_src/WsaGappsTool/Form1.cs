@@ -27,6 +27,7 @@ namespace WsaGappsTool
             performPathChecks();
         }
 
+        // NOT USED
         private void automaticInstallationToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (MessageBox.Show("The automatic installation feature downloads both the WSA .msix package and the latest gapps package, then automatically begins the modification process. \n\nThis feature is experimental, and therefore may not operate as intended. \n\nWould you like to continue anyway?", "Automatic installation", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
@@ -67,15 +68,15 @@ namespace WsaGappsTool
         {
             bool error = false;
 
-            if (!File.Exists(config.sevenZip_Ex))
+            if (!File.Exists(Paths._7zipExe))
             {
-                MessageBox.Show(String.Format("7z executable could not be found at the expected path: {0}", config.sevenZip_Ex));
+                MessageBox.Show(String.Format("7z executable could not be found at the expected path: {0}", Paths._7zipExe));
                 error = true;
             }
 
-            if (!File.Exists(config.qemu_Ex))
+            if (!File.Exists(Paths.QemuExe))
             {
-                MessageBox.Show(String.Format("QEMU executable could not be found at the expected path: {0}", config.qemu_Ex));
+                MessageBox.Show(String.Format("QEMU executable could not be found at the expected path: {0}", Paths.QemuExe));
                 error = true;
             }
 

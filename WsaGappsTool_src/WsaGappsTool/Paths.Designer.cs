@@ -22,14 +22,14 @@ namespace WsaGappsTool {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Resources {
+    internal class Paths {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal Resources() {
+        internal Paths() {
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace WsaGappsTool {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("WsaGappsTool.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("WsaGappsTool.Paths", typeof(Paths).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -61,56 +61,20 @@ namespace WsaGappsTool {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Wsa Gapps Tool.
+        ///   Looks up a localized string similar to ../tools/7z/7z.exe.
         /// </summary>
-        internal static string Config_AppName {
+        internal static string _7zipExe {
             get {
-                return ResourceManager.GetString("Config_AppName", resourceCulture);
+                return ResourceManager.GetString("_7zipExe", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to https://api.opengapps.org/list.
+        ///   Looks up a localized string similar to ../qemu/qemu-system-x86_64.exe.
         /// </summary>
-        internal static string Gapps_ApiURL {
+        internal static string QemuExe {
             get {
-                return ResourceManager.GetString("Gapps_ApiURL", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to 11.0.
-        /// </summary>
-        internal static string Gapps_TargetAndroidVersionString {
-            get {
-                return ResourceManager.GetString("Gapps_TargetAndroidVersionString", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to x86_64.
-        /// </summary>
-        internal static string Gapps_TargetArch {
-            get {
-                return ResourceManager.GetString("Gapps_TargetArch", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to blob/main/README.md.
-        /// </summary>
-        internal static string GitHubRepoReadmeURL {
-            get {
-                return ResourceManager.GetString("GitHubRepoReadmeURL", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to https://github.com/JosephM101/WSA_Gapps_Tool/.
-        /// </summary>
-        internal static string GitHubRepoURL {
-            get {
-                return ResourceManager.GetString("GitHubRepoURL", resourceCulture);
+                return ResourceManager.GetString("QemuExe", resourceCulture);
             }
         }
     }

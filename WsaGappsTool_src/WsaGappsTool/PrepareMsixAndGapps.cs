@@ -124,9 +124,9 @@ namespace WsaGappsTool
         void DownloadGapps()
         {
             label_processStatus.Text = "Preparing to download gapps package...";
-            string gappsUri = "https://api.opengapps.org/list";
-            string androidVersion = "11.0";
-            string arch = "x86_64";
+            string gappsUri = Resources.Gapps_ApiURL;
+            string androidVersion = Resources.Gapps_TargetAndroidVersionString;
+            string arch = Resources.Gapps_TargetArch;
             //string variant = "pico";
 
             string gappsJson = "";

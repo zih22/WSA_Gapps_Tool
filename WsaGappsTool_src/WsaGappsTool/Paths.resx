@@ -117,22 +117,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Config_AppName" xml:space="preserve">
-    <value>Wsa Gapps Tool</value>
+  <data name="QemuExe" xml:space="preserve">
+    <value>../qemu/qemu-system-x86_64.exe</value>
   </data>
-  <data name="Gapps_ApiURL" xml:space="preserve">
-    <value>https://api.opengapps.org/list</value>
-  </data>
-  <data name="Gapps_TargetAndroidVersionString" xml:space="preserve">
-    <value>11.0</value>
-  </data>
-  <data name="Gapps_TargetArch" xml:space="preserve">
-    <value>x86_64</value>
-  </data>
-  <data name="GitHubRepoReadmeURL" xml:space="preserve">
-    <value>blob/main/README.md</value>
-  </data>
-  <data name="GitHubRepoURL" xml:space="preserve">
-    <value>https://github.com/JosephM101/WSA_Gapps_Tool/</value>
+  <data name="_7zipExe" xml:space="preserve">
+    <value>../tools/7z/7z.exe</value>
   </data>
 </root>
