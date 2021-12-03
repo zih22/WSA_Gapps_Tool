@@ -23,6 +23,8 @@ namespace WsaGappsTool
         public bool error;
         public string errorMessage = "";
 
+        public bool qemu_showWindow = true;
+
         public static string QemuRunCommandArgs = "";
 
         public QEMU_Run()
@@ -32,14 +34,6 @@ namespace WsaGappsTool
 
         private void QEMU_Run_Load(object sender, EventArgs e)
         {
-            if (!File.Exists(config.vm_systemDiskImage))
-            {
-                if (ExpandSystemImage() == false)
-                {
-                    CloseWithError(String.Format("Could not find or open system image ({0}).", config.vm_systemDiskImage));
-                }
-            }
-
             // Generate QEMU command line arguments
 
             // Get available cores
@@ -52,7 +46,7 @@ namespace WsaGappsTool
                 CloseWithError("Not enough system memory left to start VM.");
             }
 
-            QemuRunCommandArgs = String.Format(@"-no-user-config -display sdl -serial stdio -net nic -net user -M pc -smp cores={0} -m {1} -device ich9-intel-hda -device ich9-ahci,id=sata -device ide-hd,bus=sata.2,drive=os,bootindex=0 -drive id=os,if=none,file=system.qcow2,format=qcow2,snapshot=on -device ide-hd,bus=sata.3,drive=DATA -drive id=DATA,if=none,file=data.vhdx,format=vhdx -device ide-hd,bus=sata.4,drive=CONFIG -drive id=CONFIG,if=none,file=config.vhdx,format=vhdx", cores, config.DefaultVmMemoryAllocationAmount);
+            QemuRunCommandArgs = String.Format(@"-no-user-config -display {2} -serial stdio -net nic -net user -M pc -smp cores={0} -m {1} -device ich9-intel-hda -device ich9-ahci,id=sata -device ide-hd,bus=sata.2,drive=os,bootindex=0 -drive id=os,if=none,file=system.qcow2,format=qcow2,snapshot=on -device ide-hd,bus=sata.3,drive=DATA -drive id=DATA,if=none,file=data.vhdx,format=vhdx -device ide-hd,bus=sata.4,drive=CONFIG -drive id=CONFIG,if=none,file=config.vhdx,format=vhdx", cores, config.DefaultVmMemoryAllocationAmount, EvaluateBool(qemu_showWindow, trueValue: "sdl", falseValue: "none"));
             backgroundWorker_qemuVm.RunWorkerAsync();
         }
 
@@ -90,8 +84,29 @@ namespace WsaGappsTool
             Close();
         }
 
+        string EvaluateBool(bool value, string trueValue, string falseValue)
+        {
+            if (value)
+            {
+                return trueValue;
+            }
+            else return falseValue;
+        }
+
         private void backgroundWorker_qemuVm_DoWork(object sender, DoWorkEventArgs e)
         {
+            if (!File.Exists(config.vm_systemDiskImage))
+            {
+                setStatusText("Expanding system image...");
+                if (ExpandSystemImage() == false)
+                {
+                    this.Invoke((MethodInvoker)delegate
+                    {
+                        CloseWithError(String.Format("Could not find or open system image ({0}).", config.vm_systemDiskImage));
+                    });
+                }
+            }
+
             qemuProcessStartInfo = new ProcessStartInfo(Resources.Paths.QemuExe, QemuRunCommandArgs);
             qemuProcessStartInfo.RedirectStandardOutput = true;
             qemuProcessStartInfo.RedirectStandardError = true;
