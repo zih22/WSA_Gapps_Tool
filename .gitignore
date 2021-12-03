@@ -388,3 +388,5 @@ FodyWeavers.xsd
 *.sln.iml
 WsaGappsTool/obj/Debug/DesignTimeResolveAssemblyReferences.cache
 vm/data.vhdx
+
+.editorconfig
