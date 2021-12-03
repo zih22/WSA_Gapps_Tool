@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using WsaGappsTool;
+using WsaGappsTool.Resources;
 using WsaGappsTool.VhdxHelper;
 
 namespace WsaGappsTool
@@ -40,7 +41,7 @@ namespace WsaGappsTool
         {
             //string message = "This process might take a while (~10-15 minutes). Are you sure you want to continue?";
             string message = "This process might take a while. Continue?";
-            if (MessageBox.Show(message, Resources.Config_AppName, MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            if (MessageBox.Show(message, Resources.Resources.Config_AppName, MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
                 PrepareMsixAndGapps prepareMsixAndGapps = new PrepareMsixAndGapps(textBox_msixPackagePath.Text, textBox_gappsPackagePath.Text);
                 DialogResult result = prepareMsixAndGapps.ShowDialog();
@@ -165,7 +166,7 @@ namespace WsaGappsTool
 
         private void viewProjectOnGitHubToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Process.Start(Resources.GitHubRepoURL);
+            Process.Start(Resources.Resources.GitHubRepoURL);
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)

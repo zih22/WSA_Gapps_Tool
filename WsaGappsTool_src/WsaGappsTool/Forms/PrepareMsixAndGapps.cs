@@ -17,6 +17,7 @@ using System.Collections;
 using System.Text.RegularExpressions;
 using System.Threading;
 using WsaGappsTool.VhdxHelper;
+using WsaGappsTool.Resources;
 
 namespace WsaGappsTool
 {
@@ -128,9 +129,9 @@ namespace WsaGappsTool
         void DownloadGapps()
         {
             label_processStatus.Text = "Preparing to download gapps package...";
-            string gappsUri = Resources.Gapps_ApiURL;
-            string androidVersion = Resources.Gapps_TargetAndroidVersionString;
-            string arch = Resources.Gapps_TargetArch;
+            string gappsUri = Resources.Resources.Gapps_ApiURL;
+            string androidVersion = Resources.Resources.Gapps_TargetAndroidVersionString;
+            string arch = Resources.Resources.Gapps_TargetArch;
             //string variant = "pico";
 
             string gappsJson = "";
@@ -480,9 +481,9 @@ namespace WsaGappsTool
             }
 
             setStatusText("Creating new data image...");
-            string vhdx_temp = Paths.VHDX_Contents_TempDir;
-            string vhdx_temp_gapps = Paths.VHDX_Contents_TempDir_Gapps;
-            string vhdx_temp_images = Paths.VHDX_Contents_TempDir_Images;
+            string vhdx_temp = Resources.Paths.VHDX_Contents_TempDir;
+            string vhdx_temp_gapps = Resources.Paths.VHDX_Contents_TempDir_Gapps;
+            string vhdx_temp_images = Resources.Paths.VHDX_Contents_TempDir_Images;
             Directory.CreateDirectory(vhdx_temp);
             Directory.CreateDirectory(vhdx_temp_gapps);
             Directory.CreateDirectory(vhdx_temp_images);

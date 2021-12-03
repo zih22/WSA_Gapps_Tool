@@ -110,7 +110,7 @@ namespace WsaGappsTool
 
         private void button1_Click(object sender, EventArgs e)
         {
-            Process.Start(Resources.GitHubRepoURL + Resources.GitHubRepoReadmeURL);
+            Process.Start(Resources.Resources.GitHubRepoURL + Resources.Resources.GitHubRepoReadmeURL);
         }
     }
 }
