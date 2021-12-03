@@ -387,3 +387,4 @@ FodyWeavers.xsd
 .idea/
 *.sln.iml
 WsaGappsTool/obj/Debug/DesignTimeResolveAssemblyReferences.cache
+vm/data.vhdx
