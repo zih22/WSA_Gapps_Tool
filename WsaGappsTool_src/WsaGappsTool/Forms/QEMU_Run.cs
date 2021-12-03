@@ -136,7 +136,7 @@ namespace WsaGappsTool
             }
             else if (e.Data.Contains("Done"))
             {
-                setStatusText("VM is shutting down...");
+                setStatusText("Process complete. VM is now shutting down...");
             }
             else
             {
