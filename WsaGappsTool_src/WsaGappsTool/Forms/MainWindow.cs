@@ -20,7 +20,7 @@ namespace WsaGappsTool
         public Form1()
         {
             InitializeComponent();
-            //VhdxBuilder.CreateFromDirectory("cache", "data.vhdx", "test", 500).Close();
+            // Debug.WriteLine(SystemInfo.GetAvailablePhysicalMemory());
         }
 
         private void Form1_Load(object sender, EventArgs e)

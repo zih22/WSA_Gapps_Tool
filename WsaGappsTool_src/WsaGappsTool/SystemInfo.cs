@@ -9,28 +9,36 @@ namespace WsaGappsTool
 {
     public static class SystemInfo
     {
-        public static long GetAvailablePhysicalMemory()
+        /// <summary>
+        /// Gets amount of available physical memory
+        /// </summary>
+        /// <returns>Available physical memory in kilobytes (KB)</returns>
+        public static UInt64 GetAvailablePhysicalMemory()
         {
-            long availableVirtualMemory = 0;
+            UInt64 availablePhysicalMemory = 0;
             ObjectQuery objectQuery = new ObjectQuery("SELECT * FROM Win32_OperatingSystem");
             ManagementObjectSearcher managementObjectSearcher = new ManagementObjectSearcher(objectQuery);
             ManagementObjectCollection managementObjectCollection = managementObjectSearcher.Get();
             foreach (ManagementObject managementObject in managementObjectCollection)
             {
-                availableVirtualMemory = long.Parse((string)managementObject["FreePhysicalMemory"]);
+                availablePhysicalMemory = (UInt64)managementObject["FreePhysicalMemory"];
             }
-            return availableVirtualMemory;
+            return availablePhysicalMemory;
         }
 
-        public static long GetAvailableVirtualMemory()
+        /// <summary>
+        /// Gets amount of available virtual memory
+        /// </summary>
+        /// <returns>Available virtual memory in kilobytes (KB)</returns>
+        public static UInt64 GetAvailableVirtualMemory()
         {
-            long availableVirtualMemory = 0;
+            UInt64 availableVirtualMemory = 0;
             ObjectQuery objectQuery = new ObjectQuery("SELECT * FROM Win32_OperatingSystem");
             ManagementObjectSearcher managementObjectSearcher = new ManagementObjectSearcher(objectQuery);
             ManagementObjectCollection managementObjectCollection = managementObjectSearcher.Get();
             foreach (ManagementObject managementObject in managementObjectCollection)
             {
-                availableVirtualMemory = long.Parse((string)managementObject["FreeVirtualMemory"]);
+                availableVirtualMemory = (UInt64)managementObject["FreeVirtualMemory"];
             }
             return availableVirtualMemory;
         }
