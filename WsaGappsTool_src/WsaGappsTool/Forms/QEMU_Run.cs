@@ -126,6 +126,14 @@ namespace WsaGappsTool
             {
                 setStatusText("VM is running. Getting ready...");
             }
+            else if(e.Data.Contains(error_gappsNotFound))
+            {
+                CloseWithError(error_gappsNotFound);
+            }
+            else if (e.Data.Contains(error_systemImagesNotFound))
+            {
+                CloseWithError(error_systemImagesNotFound);
+            }
             else if (e.Data.Contains("Done"))
             {
                 setStatusText("VM is shutting down...");
