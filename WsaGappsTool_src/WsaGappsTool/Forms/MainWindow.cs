@@ -57,6 +57,19 @@ namespace WsaGappsTool
 
                     }
                 }
+                else
+                {
+                    QEMU_Run qemu = new QEMU_Run();
+                    DialogResult qemuResult = qemu.ShowDialog();
+                    if (result == DialogResult.Abort && qemu.error)
+                    {
+                        MessageBox.Show(String.Format("Error modifying images: {0}", qemu.errorMessage), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Process complete!", "Done!", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                }
             }
         }
 
@@ -90,19 +103,22 @@ namespace WsaGappsTool
 
         void refreshSummaryLabel()
         {
+            string msixStr = "MSIX";
+            string gappsStr = "Gapps";
+
             if (textBox_gappsPackagePath.TextLength < 1 && textBox_msixPackagePath.TextLength < 1)
             {
-                summaryLabel.Text = "MSIX and Gapps will be downloaded";
+                summaryLabel.Text = String.Format("{0} and {1} will be downloaded", msixStr, gappsStr);
             }
             else
             {
                 if (textBox_gappsPackagePath.TextLength < 1)
                 {
-                    summaryLabel.Text = "Gapps will be downloaded";
+                    summaryLabel.Text = String.Format("{0} will be downloaded", msixStr);
                 }
                 else if (textBox_msixPackagePath.TextLength < 1)
                 {
-                    summaryLabel.Text = "MSIX will be downloaded";
+                    summaryLabel.Text = String.Format("{0} will be downloaded", gappsStr);
                 }
                 else
                 {

@@ -510,7 +510,7 @@ namespace WsaGappsTool
             Thread.Sleep(2000); // Sleep for 2 seconds to allow things to catch up
             // Clean up
             Directory.Delete(vhdx_temp, true);
-            Directory.Delete(config.CacheDirectory, true);
+            //Directory.Delete(config.CacheDirectory, true);
         }
 
         private void backgroundWorker_PrepareFiles_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -520,7 +520,13 @@ namespace WsaGappsTool
             {
                 progressBar1.Style = ProgressBarStyle.Blocks;
                 progressBar1.Value = 100;
-            });
+                Close();
+            });            
+        }
+
+        private void PrepareMsixAndGapps_FormClosing(object sender, FormClosingEventArgs e)
+        {
+
         }
     }
 }

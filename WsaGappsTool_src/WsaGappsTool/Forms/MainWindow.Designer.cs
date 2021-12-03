@@ -61,9 +61,10 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(15, 79);
+            this.label1.Location = new System.Drawing.Point(20, 97);
+            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(82, 13);
+            this.label1.Size = new System.Drawing.Size(99, 16);
             this.label1.TabIndex = 0;
             this.label1.Text = "MSIX Package:";
             // 
@@ -71,18 +72,20 @@
             // 
             this.textBox_msixPackagePath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_msixPackagePath.Location = new System.Drawing.Point(103, 76);
+            this.textBox_msixPackagePath.Location = new System.Drawing.Point(137, 94);
+            this.textBox_msixPackagePath.Margin = new System.Windows.Forms.Padding(4);
             this.textBox_msixPackagePath.Name = "textBox_msixPackagePath";
-            this.textBox_msixPackagePath.Size = new System.Drawing.Size(421, 20);
+            this.textBox_msixPackagePath.Size = new System.Drawing.Size(560, 22);
             this.textBox_msixPackagePath.TabIndex = 1;
             this.textBox_msixPackagePath.TextChanged += new System.EventHandler(this.textBox_msixPackagePath_TextChanged);
             // 
             // button_browseForMsixPackage
             // 
             this.button_browseForMsixPackage.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_browseForMsixPackage.Location = new System.Drawing.Point(530, 74);
+            this.button_browseForMsixPackage.Location = new System.Drawing.Point(707, 91);
+            this.button_browseForMsixPackage.Margin = new System.Windows.Forms.Padding(4);
             this.button_browseForMsixPackage.Name = "button_browseForMsixPackage";
-            this.button_browseForMsixPackage.Size = new System.Drawing.Size(95, 23);
+            this.button_browseForMsixPackage.Size = new System.Drawing.Size(127, 28);
             this.button_browseForMsixPackage.TabIndex = 2;
             this.button_browseForMsixPackage.Text = "Browse";
             this.button_browseForMsixPackage.UseVisualStyleBackColor = true;
@@ -91,9 +94,10 @@
             // button_downloadLatestMsixPackage
             // 
             this.button_downloadLatestMsixPackage.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_downloadLatestMsixPackage.Location = new System.Drawing.Point(530, 104);
+            this.button_downloadLatestMsixPackage.Location = new System.Drawing.Point(707, 128);
+            this.button_downloadLatestMsixPackage.Margin = new System.Windows.Forms.Padding(4);
             this.button_downloadLatestMsixPackage.Name = "button_downloadLatestMsixPackage";
-            this.button_downloadLatestMsixPackage.Size = new System.Drawing.Size(95, 23);
+            this.button_downloadLatestMsixPackage.Size = new System.Drawing.Size(127, 28);
             this.button_downloadLatestMsixPackage.TabIndex = 3;
             this.button_downloadLatestMsixPackage.Text = "Download latest";
             this.button_downloadLatestMsixPackage.UseVisualStyleBackColor = true;
@@ -102,9 +106,10 @@
             // button_downloadLatestGappsPackage
             // 
             this.button_downloadLatestGappsPackage.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_downloadLatestGappsPackage.Location = new System.Drawing.Point(530, 188);
+            this.button_downloadLatestGappsPackage.Location = new System.Drawing.Point(707, 231);
+            this.button_downloadLatestGappsPackage.Margin = new System.Windows.Forms.Padding(4);
             this.button_downloadLatestGappsPackage.Name = "button_downloadLatestGappsPackage";
-            this.button_downloadLatestGappsPackage.Size = new System.Drawing.Size(95, 23);
+            this.button_downloadLatestGappsPackage.Size = new System.Drawing.Size(127, 28);
             this.button_downloadLatestGappsPackage.TabIndex = 7;
             this.button_downloadLatestGappsPackage.Text = "Download latest";
             this.button_downloadLatestGappsPackage.UseVisualStyleBackColor = true;
@@ -113,9 +118,10 @@
             // button_browseForGappsPackage
             // 
             this.button_browseForGappsPackage.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_browseForGappsPackage.Location = new System.Drawing.Point(530, 158);
+            this.button_browseForGappsPackage.Location = new System.Drawing.Point(707, 194);
+            this.button_browseForGappsPackage.Margin = new System.Windows.Forms.Padding(4);
             this.button_browseForGappsPackage.Name = "button_browseForGappsPackage";
-            this.button_browseForGappsPackage.Size = new System.Drawing.Size(95, 23);
+            this.button_browseForGappsPackage.Size = new System.Drawing.Size(127, 28);
             this.button_browseForGappsPackage.TabIndex = 6;
             this.button_browseForGappsPackage.Text = "Browse";
             this.button_browseForGappsPackage.UseVisualStyleBackColor = true;
@@ -125,27 +131,30 @@
             // 
             this.textBox_gappsPackagePath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_gappsPackagePath.Location = new System.Drawing.Point(103, 160);
+            this.textBox_gappsPackagePath.Location = new System.Drawing.Point(137, 197);
+            this.textBox_gappsPackagePath.Margin = new System.Windows.Forms.Padding(4);
             this.textBox_gappsPackagePath.Name = "textBox_gappsPackagePath";
-            this.textBox_gappsPackagePath.Size = new System.Drawing.Size(421, 20);
+            this.textBox_gappsPackagePath.Size = new System.Drawing.Size(560, 22);
             this.textBox_gappsPackagePath.TabIndex = 5;
             this.textBox_gappsPackagePath.TextChanged += new System.EventHandler(this.textBox_gappsPackagePath_TextChanged);
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(10, 163);
+            this.label2.Location = new System.Drawing.Point(13, 201);
+            this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(87, 13);
+            this.label2.Size = new System.Drawing.Size(109, 16);
             this.label2.TabIndex = 4;
             this.label2.Text = "Gapps Package:";
             // 
             // button_start
             // 
             this.button_start.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_start.Location = new System.Drawing.Point(550, 255);
+            this.button_start.Location = new System.Drawing.Point(733, 314);
+            this.button_start.Margin = new System.Windows.Forms.Padding(4);
             this.button_start.Name = "button_start";
-            this.button_start.Size = new System.Drawing.Size(75, 23);
+            this.button_start.Size = new System.Drawing.Size(100, 28);
             this.button_start.TabIndex = 8;
             this.button_start.Text = "Start";
             this.button_start.UseVisualStyleBackColor = true;
@@ -155,9 +164,10 @@
             // 
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label3.Location = new System.Drawing.Point(10, 35);
+            this.label3.Location = new System.Drawing.Point(13, 43);
+            this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(121, 18);
+            this.label3.Size = new System.Drawing.Size(150, 24);
             this.label3.TabIndex = 9;
             this.label3.Text = "Wsa Gapps Tool";
             // 
@@ -169,7 +179,7 @@
             this.helpToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(637, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(849, 28);
             this.menuStrip1.TabIndex = 10;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -181,7 +191,7 @@
             this.toolStripSeparator2,
             this.exitToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-            this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
+            this.fileToolStripMenuItem.Size = new System.Drawing.Size(46, 24);
             this.fileToolStripMenuItem.Text = "&File";
             // 
             // targetArchToolStripMenuItem
@@ -190,7 +200,7 @@
             this.x64ToolStripMenuItem,
             this.arm64ToolStripMenuItem});
             this.targetArchToolStripMenuItem.Name = "targetArchToolStripMenuItem";
-            this.targetArchToolStripMenuItem.Size = new System.Drawing.Size(191, 22);
+            this.targetArchToolStripMenuItem.Size = new System.Drawing.Size(238, 26);
             this.targetArchToolStripMenuItem.Text = "Target Architecture";
             // 
             // x64ToolStripMenuItem
@@ -198,19 +208,19 @@
             this.x64ToolStripMenuItem.Checked = true;
             this.x64ToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.x64ToolStripMenuItem.Name = "x64ToolStripMenuItem";
-            this.x64ToolStripMenuItem.Size = new System.Drawing.Size(107, 22);
+            this.x64ToolStripMenuItem.Size = new System.Drawing.Size(134, 26);
             this.x64ToolStripMenuItem.Text = "x64";
             // 
             // arm64ToolStripMenuItem
             // 
             this.arm64ToolStripMenuItem.Name = "arm64ToolStripMenuItem";
-            this.arm64ToolStripMenuItem.Size = new System.Drawing.Size(107, 22);
+            this.arm64ToolStripMenuItem.Size = new System.Drawing.Size(134, 26);
             this.arm64ToolStripMenuItem.Text = "arm64";
             // 
             // automaticInstallationToolStripMenuItem
             // 
             this.automaticInstallationToolStripMenuItem.Name = "automaticInstallationToolStripMenuItem";
-            this.automaticInstallationToolStripMenuItem.Size = new System.Drawing.Size(191, 22);
+            this.automaticInstallationToolStripMenuItem.Size = new System.Drawing.Size(238, 26);
             this.automaticInstallationToolStripMenuItem.Text = "Automatic installation";
             this.automaticInstallationToolStripMenuItem.Visible = false;
             this.automaticInstallationToolStripMenuItem.Click += new System.EventHandler(this.automaticInstallationToolStripMenuItem_Click);
@@ -218,12 +228,12 @@
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(188, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(235, 6);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(191, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(238, 26);
             this.exitToolStripMenuItem.Text = "E&xit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -234,25 +244,25 @@
             this.toolStripSeparator1,
             this.viewProjectOnGitHubToolStripMenuItem});
             this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
-            this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
+            this.helpToolStripMenuItem.Size = new System.Drawing.Size(55, 24);
             this.helpToolStripMenuItem.Text = "&Help";
             // 
             // aboutToolStripMenuItem
             // 
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(246, 26);
             this.aboutToolStripMenuItem.Text = "&About...";
             this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(194, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(243, 6);
             // 
             // viewProjectOnGitHubToolStripMenuItem
             // 
             this.viewProjectOnGitHubToolStripMenuItem.Name = "viewProjectOnGitHubToolStripMenuItem";
-            this.viewProjectOnGitHubToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
+            this.viewProjectOnGitHubToolStripMenuItem.Size = new System.Drawing.Size(246, 26);
             this.viewProjectOnGitHubToolStripMenuItem.Text = "View Project on GitHub";
             this.viewProjectOnGitHubToolStripMenuItem.Click += new System.EventHandler(this.viewProjectOnGitHubToolStripMenuItem_Click);
             // 
@@ -270,10 +280,9 @@
             // 
             this.summaryLabel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.summaryLabel.Location = new System.Drawing.Point(9, 259);
-            this.summaryLabel.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.summaryLabel.Location = new System.Drawing.Point(12, 319);
             this.summaryLabel.Name = "summaryLabel";
-            this.summaryLabel.Size = new System.Drawing.Size(536, 19);
+            this.summaryLabel.Size = new System.Drawing.Size(715, 23);
             this.summaryLabel.TabIndex = 11;
             this.summaryLabel.Text = "MSIX and Gapps will be downloaded";
             this.summaryLabel.TextAlign = System.Drawing.ContentAlignment.TopRight;
@@ -282,10 +291,9 @@
             // 
             this.msix_fileErrorLabel.AutoSize = true;
             this.msix_fileErrorLabel.ForeColor = System.Drawing.Color.Red;
-            this.msix_fileErrorLabel.Location = new System.Drawing.Point(100, 98);
-            this.msix_fileErrorLabel.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.msix_fileErrorLabel.Location = new System.Drawing.Point(133, 121);
             this.msix_fileErrorLabel.Name = "msix_fileErrorLabel";
-            this.msix_fileErrorLabel.Size = new System.Drawing.Size(91, 13);
+            this.msix_fileErrorLabel.Size = new System.Drawing.Size(114, 16);
             this.msix_fileErrorLabel.TabIndex = 12;
             this.msix_fileErrorLabel.Text = "File does not exist";
             this.msix_fileErrorLabel.Visible = false;
@@ -294,19 +302,18 @@
             // 
             this.gapps_fileErrorLabel.AutoSize = true;
             this.gapps_fileErrorLabel.ForeColor = System.Drawing.Color.Red;
-            this.gapps_fileErrorLabel.Location = new System.Drawing.Point(100, 181);
-            this.gapps_fileErrorLabel.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.gapps_fileErrorLabel.Location = new System.Drawing.Point(133, 223);
             this.gapps_fileErrorLabel.Name = "gapps_fileErrorLabel";
-            this.gapps_fileErrorLabel.Size = new System.Drawing.Size(91, 13);
+            this.gapps_fileErrorLabel.Size = new System.Drawing.Size(114, 16);
             this.gapps_fileErrorLabel.TabIndex = 13;
             this.gapps_fileErrorLabel.Text = "File does not exist";
             this.gapps_fileErrorLabel.Visible = false;
             // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(637, 290);
+            this.ClientSize = new System.Drawing.Size(849, 357);
             this.Controls.Add(this.gapps_fileErrorLabel);
             this.Controls.Add(this.msix_fileErrorLabel);
             this.Controls.Add(this.summaryLabel);
@@ -322,6 +329,7 @@
             this.Controls.Add(this.label1);
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.MaximizeBox = false;
             this.Name = "Form1";
             this.Text = "Wsa Gapps Tool";

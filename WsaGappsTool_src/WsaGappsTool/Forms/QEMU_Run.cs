@@ -36,7 +36,7 @@ namespace WsaGappsTool
             {
                 if (ExpandSystemImage() == false)
                 {
-                    CloseWithError("Could not find or open system image (system.qcow2).");
+                    CloseWithError(String.Format("Could not find or open system image ({0}).", config.vm_systemDiskImage));
                 }
             }
 
@@ -52,7 +52,7 @@ namespace WsaGappsTool
                 CloseWithError("Not enough system memory left to start VM.");
             }
 
-            QemuRunCommandArgs = String.Format(@"-no-user-config -display sdl -serial stdio -net nic -net user -display sdl -M pc -smp cores={0} -m {1} -device ich9-intel-hda -device ich9-ahci,id=sata -device ide-hd,bus=sata.2,drive=os,bootindex=0 -drive id=os,if=none,file=system.qcow2,format=qcow2,snapshot=on -device ide-hd,bus=sata.3,drive=DATA -drive id=DATA,if=none,file=data.vhdx,format=vhdx -device ide-hd,bus=sata.4,drive=CONFIG -drive id=CONFIG,if=none,file=config.vhdx,format=vhdx", cores, config.DefaultVmMemoryAllocationAmount);
+            QemuRunCommandArgs = String.Format(@"-no-user-config -display sdl -serial stdio -net nic -net user -M pc -smp cores={0} -m {1} -device ich9-intel-hda -device ich9-ahci,id=sata -device ide-hd,bus=sata.2,drive=os,bootindex=0 -drive id=os,if=none,file=system.qcow2,format=qcow2,snapshot=on -device ide-hd,bus=sata.3,drive=DATA -drive id=DATA,if=none,file=data.vhdx,format=vhdx -device ide-hd,bus=sata.4,drive=CONFIG -drive id=CONFIG,if=none,file=config.vhdx,format=vhdx", cores, config.DefaultVmMemoryAllocationAmount);
             backgroundWorker_qemuVm.RunWorkerAsync();
         }
 
@@ -67,9 +67,11 @@ namespace WsaGappsTool
         bool ExpandSystemImage()
         {
             ProcessStartInfo processStartInfo = new ProcessStartInfo();
-            processStartInfo.FileName = Resources.Paths._7zipExe;
+            processStartInfo.FileName = Path.GetFullPath(Resources.Paths._7zipExe);
             processStartInfo.Arguments = config.Vm_ExpandSystemImageArgs;
             processStartInfo.CreateNoWindow = true;
+            processStartInfo.UseShellExecute = false;
+            processStartInfo.WindowStyle = ProcessWindowStyle.Hidden;
             processStartInfo.WorkingDirectory = config.vm_dir;
             Process.Start(processStartInfo).WaitForExit();
 
@@ -94,7 +96,7 @@ namespace WsaGappsTool
             qemuProcessStartInfo.RedirectStandardOutput = true;
             qemuProcessStartInfo.RedirectStandardError = true;
             qemuProcessStartInfo.CreateNoWindow = true;
-            qemuProcessStartInfo.UseShellExecute = true;
+            qemuProcessStartInfo.UseShellExecute = false;
             qemuProcessStartInfo.WorkingDirectory = config.vm_dir;
 
             qemuProcess = new Process();
@@ -122,25 +124,28 @@ namespace WsaGappsTool
 
         private void QemuProcess_OutputDataReceived(object sender, DataReceivedEventArgs e)
         {
-            if (e.Data.Contains("Ready"))
+            if (e.Data != null)
             {
-                setStatusText("VM is running. Getting ready...");
-            }
-            else if(e.Data.Contains(error_gappsNotFound))
-            {
-                CloseWithError(error_gappsNotFound);
-            }
-            else if (e.Data.Contains(error_systemImagesNotFound))
-            {
-                CloseWithError(error_systemImagesNotFound);
-            }
-            else if (e.Data.Contains("Done"))
-            {
-                setStatusText("Process complete. VM is now shutting down...");
-            }
-            else
-            {
-                setStatusText(e.Data);
+                if (e.Data.Contains("Ready"))
+                {
+                    setStatusText("VM is running. Getting ready...");
+                }
+                else if (e.Data.Contains(error_gappsNotFound))
+                {
+                    CloseWithError(error_gappsNotFound);
+                }
+                else if (e.Data.Contains(error_systemImagesNotFound))
+                {
+                    CloseWithError(error_systemImagesNotFound);
+                }
+                else if (e.Data.Contains("Done"))
+                {
+                    setStatusText("Process complete. VM is now shutting down...");
+                }
+                else
+                {
+                    setStatusText(e.Data);
+                }
             }
         }
 
