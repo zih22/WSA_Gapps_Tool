@@ -226,13 +226,13 @@ namespace WsaGappsTool
             {
                 if (downloadStatusToShow == true)
                 {
-                    label_processStatus.Text = String.Format("Downloading WSA MSIX package ({0} bytes / {1} bytes)...", e.BytesReceived, e.TotalBytesToReceive);
+                    label_processStatus.Text = String.Format("Downloading MSIX package ({0} bytes / {1} bytes)...", e.BytesReceived, e.TotalBytesToReceive);
                     progressBar1.Value = e.ProgressPercentage;
                 }
             }
             else
             {
-                label_processStatus.Text = String.Format("Downloading WSA MSIX package ({0} bytes / {1} bytes)...", e.BytesReceived, e.TotalBytesToReceive);
+                label_processStatus.Text = String.Format("Downloading MSIX package ({0} bytes / {1} bytes)...", e.BytesReceived, e.TotalBytesToReceive);
                 progressBar1.Value = e.ProgressPercentage;
             }
         }
@@ -437,6 +437,7 @@ namespace WsaGappsTool
                 // label_processStatus.Text = String.Format("Creating new data image...");
                 // Process.Start(config.sevenZip_Ex, "x ..\\vm\\data\\data.7z.001 -o\"..\vm\\\"")
                 label_processStatus.Text = String.Format("Creating data image with contents...");
+
             }
         }
 
