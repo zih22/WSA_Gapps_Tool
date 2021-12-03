@@ -36,7 +36,7 @@ namespace WsaGappsTool
             {
                 if (ExpandSystemImage() == false)
                 {
-                    CloseWithError("Could not find or open system image (system.vhdx).");
+                    CloseWithError("Could not find or open system image (system.qcow2).");
                 }
             }
 

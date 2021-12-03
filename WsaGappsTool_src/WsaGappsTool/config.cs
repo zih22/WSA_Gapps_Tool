@@ -10,7 +10,7 @@ namespace WsaGappsTool
     {
         public static string vm_dir = "../vm/";
         public static string vm_dataDiskImage = vm_dir + "data.vhdx";
-        public static string vm_systemDiskImage = vm_dir + "system.vhdx";
+        public static string vm_systemDiskImage = vm_dir + "system.qcow2";
         public static string CacheDirectory = Resources.Paths.CacheDirectory;
 
         public static int DefaultDataDiskImageSizeMB = 8192; // 8GB
