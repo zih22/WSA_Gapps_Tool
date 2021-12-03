@@ -225,6 +225,7 @@
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
             this.exitToolStripMenuItem.Size = new System.Drawing.Size(191, 22);
             this.exitToolStripMenuItem.Text = "E&xit";
+            this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
             // helpToolStripMenuItem
             // 
@@ -259,13 +260,11 @@
             // 
             this.gappsPackage_openFileDialog.Filter = "Gapps Zip File|*.zip";
             this.gappsPackage_openFileDialog.Title = "Select Gapps Package";
-            this.gappsPackage_openFileDialog.FileOk += new System.ComponentModel.CancelEventHandler(this.gappsPackage_openFileDialog_FileOk);
             // 
             // msixPackage_openFileDialog
             // 
             this.msixPackage_openFileDialog.Filter = "MSIX Application Package|*.msix";
             this.msixPackage_openFileDialog.Title = "Select MSIX Package";
-            this.msixPackage_openFileDialog.FileOk += new System.ComponentModel.CancelEventHandler(this.msixPackage_openFileDialog_FileOk);
             // 
             // summaryLabel
             // 

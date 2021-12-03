@@ -117,8 +117,20 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="CacheDirectory" xml:space="preserve">
+    <value>cache/</value>
+  </data>
   <data name="QemuExe" xml:space="preserve">
     <value>../qemu/qemu-system-x86_64.exe</value>
+  </data>
+  <data name="VHDX_Contents_TempDir" xml:space="preserve">
+    <value>cache/temp/</value>
+  </data>
+  <data name="VHDX_Contents_TempDir_Gapps" xml:space="preserve">
+    <value>cache/temp/gapps/</value>
+  </data>
+  <data name="VHDX_Contents_TempDir_Images" xml:space="preserve">
+    <value>cache/temp/images/</value>
   </data>
   <data name="_7zipExe" xml:space="preserve">
     <value>../tools/7z/7z.exe</value>

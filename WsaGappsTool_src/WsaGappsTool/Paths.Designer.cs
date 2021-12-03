@@ -70,11 +70,47 @@ namespace WsaGappsTool {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to cache/.
+        /// </summary>
+        internal static string CacheDirectory {
+            get {
+                return ResourceManager.GetString("CacheDirectory", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to ../qemu/qemu-system-x86_64.exe.
         /// </summary>
         internal static string QemuExe {
             get {
                 return ResourceManager.GetString("QemuExe", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to cache/temp/.
+        /// </summary>
+        internal static string VHDX_Contents_TempDir {
+            get {
+                return ResourceManager.GetString("VHDX_Contents_TempDir", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to cache/temp/gapps/.
+        /// </summary>
+        internal static string VHDX_Contents_TempDir_Gapps {
+            get {
+                return ResourceManager.GetString("VHDX_Contents_TempDir_Gapps", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to cache/temp/images/.
+        /// </summary>
+        internal static string VHDX_Contents_TempDir_Images {
+            get {
+                return ResourceManager.GetString("VHDX_Contents_TempDir_Images", resourceCulture);
             }
         }
     }

@@ -16,6 +16,7 @@ using System.Security.Cryptography;
 using System.Collections;
 using System.Text.RegularExpressions;
 using System.Threading;
+using WsaGappsTool.VhdxHelper;
 
 namespace WsaGappsTool
 {
@@ -24,7 +25,7 @@ namespace WsaGappsTool
         bool downloadStatusToShow = false; // false for Gapps; true for MSIX
 
         HttpWebRequest webRequest;
-        HttpWebRequest webRequest2;
+        HttpWebRequest msix_httpWebRequest;
         WebClient gapps_webClient;
         WebClient msix_webClient;
 
@@ -81,9 +82,12 @@ namespace WsaGappsTool
             Directory.CreateDirectory(config.CacheDirectory);
         }
 
-        private void label_processStatus_Click(object sender, EventArgs e)
+        void setStatusText(string text)
         {
-
+            this.Invoke((MethodInvoker)delegate
+            {
+                label_processStatus.Text = text;
+            });
         }
 
         private void PrepareMsixAndGapps_Load(object sender, EventArgs e)
@@ -196,7 +200,7 @@ namespace WsaGappsTool
         {
             label_processStatus.Text = "Preparing to download MSIX package...";
             string msixUri = "https://store.rg-adguard.net/api/GetFiles";
-            string arch = "x64";
+            //string arch = "x64";
             string lineToSearchFor = "<tr style=\".*?\"><td><a href=\"(?<url>.*?)\" rel=\"noreferrer\">MicrosoftCorporationII\\.WindowsSubsystemForAndroid_[^<]+\\.msixbundle</a></td>.+</tr>";
 
             Hashtable parameters = new Hashtable()
@@ -207,12 +211,12 @@ namespace WsaGappsTool
                 {"lang", "en_US"}
             };
 
-            webRequest2 = (HttpWebRequest)WebRequest.Create(msixUri);
-            webRequest2.Method = "POST";
-            webRequest2.ContentType = "application/x-www-form-urlencoded";
+            msix_httpWebRequest = (HttpWebRequest)WebRequest.Create(msixUri);
+            msix_httpWebRequest.Method = "POST";
+            msix_httpWebRequest.ContentType = "application/x-www-form-urlencoded";
 
             // Set body
-            using (StreamWriter streamWriter = new StreamWriter(webRequest2.GetRequestStream()))
+            using (StreamWriter streamWriter = new StreamWriter(msix_httpWebRequest.GetRequestStream()))
             {
                 foreach (DictionaryEntry entry in parameters)
                 {
@@ -222,7 +226,7 @@ namespace WsaGappsTool
                 streamWriter.Flush();
                 streamWriter.Close();
             }
-            HttpWebResponse httpWebResponse = (HttpWebResponse)webRequest2.GetResponse();
+            HttpWebResponse httpWebResponse = (HttpWebResponse)msix_httpWebRequest.GetResponse();
             string responseData = new StreamReader(httpWebResponse.GetResponseStream()).ReadToEnd();
             Debug.WriteLine(String.Format("Data: {0}", responseData));
             Debug.WriteLine(String.Format("Type: {0}", httpWebResponse.ContentType));
@@ -304,11 +308,12 @@ namespace WsaGappsTool
             }
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void cancelButton_Click(object sender, EventArgs e)
         {
             // Cancel
             if (MessageBox.Show("Are you sure you want to cancel?", "Cancel?", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
+                backgroundWorker_PrepareFiles.CancelAsync();
                 CloseWithError("Process cancelled.");
             }
         }
@@ -370,7 +375,7 @@ namespace WsaGappsTool
             // fileChecksumString = fileChecksumString.Substring(0, md5_length).ToUpper();
 
             // Determine the verdict...
-            if (fileChecksumString != CalculatedChecksum) return false; // File's checksum did not match expected
+            if (fileChecksumString != CalculatedChecksum) return false; // The generated checksum did not match the one retrieved from the server
             else return true; // All good!
         }
 
@@ -402,96 +407,119 @@ namespace WsaGappsTool
         {
             if (!(gapps_webClient.IsBusy || msix_webClient.IsBusy))
             {
-                // Extract msix to temp folder in cache
-                label_processStatus.Text = "Extracting MSIX package...";
+                timer1.Stop();
+                timer1.Enabled = false;
+                backgroundWorker_PrepareFiles.RunWorkerAsync();
+            }
+        }
+
+        private void backgroundWorker_PrepareFiles_DoWork(object sender, DoWorkEventArgs e)
+        {
+            setStatusText("Extracting MSIX package...");
+            this.Invoke((MethodInvoker)delegate
+            {
                 progressBar1.Style = ProgressBarStyle.Marquee;
+            });
 
-                // // Use 7zip to extract, and get progress from stdout
-                // ProcessStartInfo startInfo = new ProcessStartInfo();
-                // startInfo.FileName = config.sevenZip_Ex;
-                // startInfo.Arguments = "x -y -o" + config.CacheDirectory + "msix/" + " \"" + Path.GetFullPath(MsixPath) + "\"";
-                // startInfo.UseShellExecute = true;
-                // //startInfo.RedirectStandardOutput = true;
-                // //startInfo.RedirectStandardError = true;
-                // startInfo.CreateNoWindow = false;
-                // Process extractor = new Process();
-                // extractor.StartInfo = startInfo;
-                // extractor.Start();
-                // extractor.WaitForExit();
+            // Extract MSIX archive
+            Regex x64_regex = new Regex(@"_x64_");
+            string msixExtractPath = config.CacheDirectory + "msix/";
+            ICSharpCode.SharpZipLib.Zip.FastZip unzipper = new ICSharpCode.SharpZipLib.Zip.FastZip();
+            if (!Directory.Exists(msixExtractPath))
+            {
+                Directory.CreateDirectory(msixExtractPath);
+            }
+            unzipper.ExtractZip(MsixPath, msixExtractPath, x64_regex.ToString());
 
-                // // Create listener to continuously read stdout, and parse percentage
-                // string line;
-                // while ((line = extractor.StandardOutput.ReadLine()) != null)
-                // {
-                //     if (line.Contains("%"))
-                //     {
-                //         int percentage = int.Parse(line.Substring(0, line.IndexOf("%")));
-                //         progressBar1.Value = percentage;
-                //     }
-                // }
-
-                // Extract using SharpZipLib
-                Regex x64_regex = new Regex(@"_x64_");
-                string msixExtractPath = config.CacheDirectory + "msix/";
-                ICSharpCode.SharpZipLib.Zip.FastZip unzipper = new ICSharpCode.SharpZipLib.Zip.FastZip();
-                if (!Directory.Exists(msixExtractPath))
+            // Look for package that contains x64 in title using match regex
+            string[] files = Directory.GetFiles(msixExtractPath, "*.msix");
+            string x64_package = "";
+            foreach (string file in files)
+            {
+                if (x64_regex.IsMatch(Path.GetFileName(file)))
                 {
-                    Directory.CreateDirectory(msixExtractPath);
+                    x64_package = file;
+                    break;
                 }
-                //unzipper.ExtractZip(MsixPath, msixExtractPath, null);
-                unzipper.ExtractZip(MsixPath, msixExtractPath, x64_regex.ToString());
+            }
 
-                // Look for package that contains x64 in title using match regex
-                string[] files = Directory.GetFiles(msixExtractPath, "*.msix");
-                string x64_package = "";
-                // Regex match for _x64_ in title
-                foreach (string file in files)
-                {
-                    if (x64_regex.IsMatch(Path.GetFileName(file)))
-                    {
-                        x64_package = file;
-                        break;
-                    }
-                }
+            //Debug.WriteLine("Package: " + x64_package);
+            unzipper.ExtractZip(x64_package, msixExtractPath, null);
 
-                Debug.WriteLine("Package: " + x64_package);
-                unzipper.ExtractZip(x64_package, msixExtractPath, x64_regex.ToString());
-                // Delete old MSIX
-                File.Delete(x64_package);
+            // Delete MSIX
+            File.Delete(x64_package);
 
-                List<string> FilesToDelete = new List<string>
+            List<string> FilesToDelete = new List<string>
                 {
                     "AppxBlockMap.xml",
                     "AppxSignature.p7x",
                     "[Content_Types].xml"
                 };
 
-                List<string> FoldersToDelete = new List<string>
+            List<string> FoldersToDelete = new List<string>
                 {
                     "AppxMetadata"
                 };
 
-                // Delete files
-                foreach (string file in FilesToDelete)
-                    if (File.Exists(msixExtractPath + file))
-                        File.Delete(msixExtractPath + file);
+            // Delete files
+            foreach (string file in FilesToDelete)
+                if (File.Exists(msixExtractPath + file))
+                    File.Delete(msixExtractPath + file);
 
-                // Delete folders (recursively)
-                foreach (string folder in FoldersToDelete)
-                    if (Directory.Exists(msixExtractPath + folder))
-                        Directory.Delete(msixExtractPath + folder, true);
+            // Delete folders (recursively)
+            foreach (string folder in FoldersToDelete)
+                if (Directory.Exists(msixExtractPath + folder))
+                    Directory.Delete(msixExtractPath + folder, true);
 
-                label_processStatus.Text = String.Format("Checking for existing data image...");
-                if (File.Exists(config.vm_dataDiskImage))
-                {
-                    label_processStatus.Text = String.Format("Deleting...");
-                    File.Delete(config.vm_dataDiskImage);
-                }
-                // label_processStatus.Text = String.Format("Creating new data image...");
-                // Process.Start(config.sevenZip_Ex, "x ..\\vm\\data\\data.7z.001 -o\"..\vm\\\"")
-                label_processStatus.Text = String.Format("Creating data image with contents...");
-
+            // Check if data.vhdx already exists, and delete it if it does
+            setStatusText("Checking for existing data image...");
+            if (File.Exists(config.vm_dataDiskImage))
+            {
+                setStatusText("Deleting existing image...");
+                File.Delete(config.vm_dataDiskImage);
             }
+
+            setStatusText("Creating new data image...");
+            string vhdx_temp = Paths.VHDX_Contents_TempDir;
+            string vhdx_temp_gapps = Paths.VHDX_Contents_TempDir_Gapps;
+            string vhdx_temp_images = Paths.VHDX_Contents_TempDir_Images;
+            Directory.CreateDirectory(vhdx_temp);
+            Directory.CreateDirectory(vhdx_temp_gapps);
+            Directory.CreateDirectory(vhdx_temp_images);
+
+            // Move all .img files to vhdx_temp_images
+            foreach (string file in Directory.GetFiles(msixExtractPath, "*.img"))
+                File.Move(file, vhdx_temp_images + Path.GetFileName(file));
+
+            // Copy gapps zip to vhdx_temp_gapps
+            // File.Copy(GappsPath, vhdx_temp_gapps + Path.GetFileName(GappsPath));
+            File.Copy(GappsPath, vhdx_temp_gapps + "pico.zip");
+
+            setStatusText("Copying files...");
+            VhdxBuilder.CreateFromDirectory(vhdx_temp, config.vm_dataDiskImage, "WSA_Data", config.DefaultDataDiskImageSizeMB).Close(); // Create a virtual VHDX image, and copy the contents of the temporary folder to it
+
+            setStatusText("Image created");
+            Thread.Sleep(2000);
+
+            setStatusText("Finishing up...");
+            this.Invoke((MethodInvoker)delegate
+            {
+                cancelButton.Enabled = false;
+            });
+            Thread.Sleep(2000); // Sleep for 2 seconds to allow things to catch up
+            // Clean up
+            Directory.Delete(vhdx_temp, true);
+            Directory.Delete(config.CacheDirectory, true);
+        }
+
+        private void backgroundWorker_PrepareFiles_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            setStatusText("Preparation complete. Getting ready to start VM...");
+            this.Invoke((MethodInvoker)delegate
+            {
+                progressBar1.Style = ProgressBarStyle.Blocks;
+                progressBar1.Value = 100;
+            });
         }
     }
 }

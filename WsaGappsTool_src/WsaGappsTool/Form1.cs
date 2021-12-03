@@ -163,19 +163,14 @@ namespace WsaGappsTool
             }
         }
 
-        private void msixPackage_openFileDialog_FileOk(object sender, CancelEventArgs e)
-        {
-
-        }
-
-        private void gappsPackage_openFileDialog_FileOk(object sender, CancelEventArgs e)
-        {
-
-        }
-
         private void viewProjectOnGitHubToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Process.Start(Resources.GitHubRepoURL);
+        }
+
+        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Close();
         }
     }
 }
