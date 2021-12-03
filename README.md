@@ -23,3 +23,4 @@ Once QEMU is started, Arch will begin booting. When it is finished booting, it w
 
 The script then mounts the data drive (`/dev/sdb1`), and checks to see if the files it is expecting are there. Once it verifies that they are, it can begin. In a nutshell, the Android system images are mounted, the contents of the gapps package are copied to the images, the permissions are set as needed, and then the images are finalized and unmounted. The modification process is now complete. The VM sends the `complete` signal through the serial port, and then runs `cleanup.sh` (located alongside `run.sh`), which unmounts everything (to prevent data corruption), and shuts the virtual machine down.
 
+Step 6: Once the VM shuts down, the application extracts the contents of `data.vhdx` and copies the new modified images to `cache/msix`, replacing the ones that were there before. It then moves the MSIX folder to `C:/`, renaming it `WSA`, and calls 
