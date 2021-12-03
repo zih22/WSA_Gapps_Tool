@@ -35,6 +35,10 @@
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.SuspendLayout();
             // 
+            // backgroundWorker_qemuVm
+            // 
+            this.backgroundWorker_qemuVm.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker_qemuVm_DoWork);
+            // 
             // cancelButton
             // 
             this.cancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
@@ -55,7 +59,7 @@
             this.label_processStatus.Name = "label_processStatus";
             this.label_processStatus.Size = new System.Drawing.Size(466, 40);
             this.label_processStatus.TabIndex = 5;
-            this.label_processStatus.Text = "Waiting up to 120 seconds for VM to come alive...";
+            this.label_processStatus.Text = "Getting ready...";
             this.label_processStatus.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
             // 
             // label1

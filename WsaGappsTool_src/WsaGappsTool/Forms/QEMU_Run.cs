@@ -14,6 +14,9 @@ namespace WsaGappsTool
 {
     public partial class QEMU_Run : Form
     {
+        ProcessStartInfo qemuProcessStartInfo;
+        Process qemuProcess;
+
         const string error_systemImagesNotFound = "System image(s) not found on data partition";
         const string error_gappsNotFound = "Gapps not found on data partition";
 
@@ -29,7 +32,7 @@ namespace WsaGappsTool
 
         private void QEMU_Run_Load(object sender, EventArgs e)
         {
-            if(!File.Exists(config.vm_systemDiskImage))
+            if (!File.Exists(config.vm_systemDiskImage))
             {
                 if (ExpandSystemImage() == false)
                 {
@@ -50,6 +53,15 @@ namespace WsaGappsTool
             }
 
             QemuRunCommandArgs = String.Format(@"-no-user-config -display sdl -serial stdio -net nic -net user -display sdl -M pc -smp cores={0} -m {1} -device ich9-intel-hda -device ich9-ahci,id=sata -device ide-hd,bus=sata.2,drive=os,bootindex=0 -drive id=os,if=none,file=system.qcow2,format=qcow2,snapshot=on -device ide-hd,bus=sata.3,drive=DATA -drive id=DATA,if=none,file=data.vhdx,format=vhdx -device ide-hd,bus=sata.4,drive=CONFIG -drive id=CONFIG,if=none,file=config.vhdx,format=vhdx", cores, config.DefaultVmMemoryAllocationAmount);
+            backgroundWorker_qemuVm.RunWorkerAsync();
+        }
+
+        void setStatusText(string text)
+        {
+            this.Invoke((MethodInvoker)delegate
+            {
+                label_processStatus.Text = text;
+            });
         }
 
         bool ExpandSystemImage()
@@ -69,7 +81,64 @@ namespace WsaGappsTool
         {
             error = true;
             errorMessage = message;
+            if (qemuProcess != null)
+            {
+                qemuProcess.Kill();
+            }
             Close();
+        }
+
+        private void backgroundWorker_qemuVm_DoWork(object sender, DoWorkEventArgs e)
+        {
+            qemuProcessStartInfo = new ProcessStartInfo(Resources.Paths.QemuExe, QemuRunCommandArgs);
+            qemuProcessStartInfo.RedirectStandardOutput = true;
+            qemuProcessStartInfo.RedirectStandardError = true;
+            qemuProcessStartInfo.CreateNoWindow = true;
+            qemuProcessStartInfo.UseShellExecute = true;
+            qemuProcessStartInfo.WorkingDirectory = config.vm_dir;
+
+            qemuProcess = new Process();
+            qemuProcess.StartInfo = qemuProcessStartInfo;
+            qemuProcess.OutputDataReceived += QemuProcess_OutputDataReceived;
+            qemuProcess.ErrorDataReceived += QemuProcess_ErrorDataReceived;
+            qemuProcess.Exited += QemuProcess_Exited;
+            qemuProcess.Start();
+            qemuProcess.BeginOutputReadLine();
+            qemuProcess.BeginErrorReadLine();
+
+            //setStatusText("Waiting up to 120 seconds for VM to come alive...");
+            setStatusText("Waiting for VM to come alive...");
+        }
+
+        private void QemuProcess_Exited(object sender, EventArgs e)
+        {
+            this.Invoke((MethodInvoker) delegate
+            {
+                setStatusText("Process complete!");
+                progressBar1.Style = ProgressBarStyle.Blocks;
+                progressBar1.Value = 100;
+            });
+        }
+
+        private void QemuProcess_OutputDataReceived(object sender, DataReceivedEventArgs e)
+        {
+            if (e.Data.Contains("Ready"))
+            {
+                setStatusText("VM is running. Getting ready...");
+            }
+            else if (e.Data.Contains("Done"))
+            {
+                setStatusText("VM is shutting down...");
+            }
+            else
+            {
+                setStatusText(e.Data);
+            }
+        }
+
+        private void QemuProcess_ErrorDataReceived(object sender, DataReceivedEventArgs e)
+        {
+
         }
     }
 }
