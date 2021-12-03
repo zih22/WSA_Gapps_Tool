@@ -15,7 +15,8 @@ namespace WsaGappsTool
 
         public static int DefaultDataDiskImageSizeMB = 8192; // 8GB
 
-        public static int MinAvailableSystemRamForVm_MB = 2048; // 2GB
+        //public static int MinAvailableSystemRamForVm_MB = 2048; // 2GB
+        public static int MinAvailableSystemRamForVm_MB = 1024; // 1GB
 
         public static int DefaultVmMemoryAllocationAmount = 1024;
 
