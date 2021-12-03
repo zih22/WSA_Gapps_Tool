@@ -252,6 +252,7 @@
             this.viewProjectOnGitHubToolStripMenuItem.Name = "viewProjectOnGitHubToolStripMenuItem";
             this.viewProjectOnGitHubToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
             this.viewProjectOnGitHubToolStripMenuItem.Text = "View Project on GitHub";
+            this.viewProjectOnGitHubToolStripMenuItem.Click += new System.EventHandler(this.viewProjectOnGitHubToolStripMenuItem_Click);
             // 
             // gappsPackage_openFileDialog
             // 

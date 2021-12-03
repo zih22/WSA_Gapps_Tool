@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Reflection;
@@ -105,6 +106,11 @@ namespace WsaGappsTool
         private void okButton_Click(object sender, EventArgs e)
         {
             Close();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            Process.Start(Resources.GitHubRepoURL + Resources.GitHubRepoReadmeURL);
         }
     }
 }

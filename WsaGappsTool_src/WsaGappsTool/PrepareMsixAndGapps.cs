@@ -38,6 +38,9 @@ namespace WsaGappsTool
         bool downloadMsix = false;
         bool downloadGapps = false;
 
+        string defaultMsixFileName = "wsa.msix";
+        string defaultGappsFileName = "pico.zip";
+
         string MsixPath = "";
         string GappsPath = "";
         private bool closing = false;
@@ -54,7 +57,7 @@ namespace WsaGappsTool
             if (msixPath == null || msixPath == "")
             {
                 downloadMsix = true;
-                MsixPath = config.CacheDirectory + "wsa.msix";
+                MsixPath = config.CacheDirectory + defaultMsixFileName;
             }
             else
             {
@@ -64,17 +67,18 @@ namespace WsaGappsTool
             if (gappsPath == null || gappsPath == "")
             {
                 downloadGapps = true;
-                GappsPath = config.CacheDirectory + "gapps.zip";
+                GappsPath = config.CacheDirectory + defaultGappsFileName;
             }
             else
             {
                 GappsPath = gappsPath;
             }
 
-            if (!Directory.Exists(config.CacheDirectory))
+            if (Directory.Exists(config.CacheDirectory))
             {
-                Directory.CreateDirectory(config.CacheDirectory);
+                Directory.Delete(config.CacheDirectory, true);
             }
+            Directory.CreateDirectory(config.CacheDirectory);
         }
 
         private void label_processStatus_Click(object sender, EventArgs e)
@@ -120,15 +124,14 @@ namespace WsaGappsTool
         void DownloadGapps()
         {
             label_processStatus.Text = "Preparing to download gapps package...";
-            // Download latest Android 11 arm64 gapps
             string gappsUri = "https://api.opengapps.org/list";
             string androidVersion = "11.0";
             string arch = "x86_64";
-            string variant = "pico";
+            //string variant = "pico";
 
             string gappsJson = "";
             // Get the latest gapps
-            // Download the latest gapps to gapps.zip; android 11; x86-64
+            // Download the latest gapps for android 11; x86-64
             webRequest = (HttpWebRequest)WebRequest.Create(gappsUri);
             webRequest.Method = "GET";
             webRequest.ContentType = "application/json";
@@ -428,26 +431,55 @@ namespace WsaGappsTool
                 // }
 
                 // Extract using SharpZipLib
+                Regex x64_regex = new Regex(@"_x64_");
                 string msixExtractPath = config.CacheDirectory + "msix/";
-                ICSharpCode.SharpZipLib.Zip.FastZip fastZip = new ICSharpCode.SharpZipLib.Zip.FastZip();
+                ICSharpCode.SharpZipLib.Zip.FastZip unzipper = new ICSharpCode.SharpZipLib.Zip.FastZip();
                 if (!Directory.Exists(msixExtractPath))
                 {
                     Directory.CreateDirectory(msixExtractPath);
                 }
-                fastZip.ExtractZip(MsixPath, msixExtractPath, @"\bx64\b");
+                //unzipper.ExtractZip(MsixPath, msixExtractPath, null);
+                unzipper.ExtractZip(MsixPath, msixExtractPath, x64_regex.ToString());
 
                 // Look for package that contains x64 in title using match regex
                 string[] files = Directory.GetFiles(msixExtractPath, "*.msix");
                 string x64_package = "";
+                // Regex match for _x64_ in title
                 foreach (string file in files)
                 {
-                    if (Regex.IsMatch(Path.GetFileName(file), @"\bx64\b", RegexOptions.IgnoreCase))
+                    if (x64_regex.IsMatch(Path.GetFileName(file)))
                     {
                         x64_package = file;
                         break;
                     }
                 }
-                Debug.WriteLine("x64 package: " + x64_package);
+
+                Debug.WriteLine("Package: " + x64_package);
+                unzipper.ExtractZip(x64_package, msixExtractPath, x64_regex.ToString());
+                // Delete old MSIX
+                File.Delete(x64_package);
+
+                List<string> FilesToDelete = new List<string>
+                {
+                    "AppxBlockMap.xml",
+                    "AppxSignature.p7x",
+                    "[Content_Types].xml"
+                };
+
+                List<string> FoldersToDelete = new List<string>
+                {
+                    "AppxMetadata"
+                };
+
+                // Delete files
+                foreach (string file in FilesToDelete)
+                    if (File.Exists(msixExtractPath + file))
+                        File.Delete(msixExtractPath + file);
+
+                // Delete folders (recursively)
+                foreach (string folder in FoldersToDelete)
+                    if (Directory.Exists(msixExtractPath + folder))
+                        Directory.Delete(msixExtractPath + folder, true);
 
                 label_processStatus.Text = String.Format("Checking for existing data image...");
                 if (File.Exists(config.vm_dataDiskImage))

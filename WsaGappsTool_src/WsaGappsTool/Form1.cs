@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -38,7 +39,7 @@ namespace WsaGappsTool
         {
             //string message = "This process might take a while (~10-15 minutes). Are you sure you want to continue?";
             string message = "This process might take a while. Continue?";
-            if (MessageBox.Show(message, config.AppName, MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            if (MessageBox.Show(message, Resources.Config_AppName, MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
                 PrepareMsixAndGapps prepareMsixAndGapps = new PrepareMsixAndGapps(textBox_msixPackagePath.Text, textBox_gappsPackagePath.Text);
                 DialogResult result = prepareMsixAndGapps.ShowDialog();
@@ -169,6 +170,11 @@ namespace WsaGappsTool
         private void gappsPackage_openFileDialog_FileOk(object sender, CancelEventArgs e)
         {
 
+        }
+
+        private void viewProjectOnGitHubToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Process.Start(Resources.GitHubRepoURL);
         }
     }
 }
