@@ -199,10 +199,10 @@ namespace WsaGappsTool.VhdxHelper
         /// <param name="volumeLabel">The volume label for the primary partition</param>
         public VhdxBuilder(string vhdxPath, long volumeCapacityInMB, string volumeLabel)
         {
-            if(volumeLabel.Length >= 32)
+            if (volumeLabel.Length >= 32)
             {
                 // Volume label is too large. We can either chop it, or throw an error.
-                if(throwErrorOnVolumeLabelOverflow)
+                if (throwErrorOnVolumeLabelOverflow)
                 {
                     // code to throw Exception
                     throw new ArgumentOutOfRangeException("Volume Label", "The volume label is too long. The max allowed size is 32 characters.");
@@ -210,7 +210,7 @@ namespace WsaGappsTool.VhdxHelper
                 else
                 {
                     volumeLabel = volumeLabel.Substring(0, 31);
-                }    
+                }
             }
             // Initialize DiscUtils
             var assembly = System.Reflection.Assembly.GetExecutingAssembly();
@@ -225,7 +225,7 @@ namespace WsaGappsTool.VhdxHelper
             disk = Disk.InitializeDynamic(vhdStream, DiscUtils.Streams.Ownership.None, megabytesToBytes(volumeCapacityInMB)); // Initialize the virtual disk
             BiosPartitionTable.Initialize(disk, WellKnownPartitionType.WindowsNtfs); // Initialize the partition table, and create a new primary partition
             volumeManager.AddDisk(disk); // Add the new disk instance to the volume manager
-            fs = NtfsFileSystem.Format(volumeManager.GetPhysicalVolumes()[0], volumeLabel, new NtfsFormatOptions().BootCode = null) ; // Select the first partition (volume), and format it as NTFS.
+            fs = NtfsFileSystem.Format(volumeManager.GetPhysicalVolumes()[0], volumeLabel, new NtfsFormatOptions().BootCode = null); // Select the first partition (volume), and format it as NTFS.
         }
 
         /// <summary>
@@ -285,6 +285,17 @@ namespace WsaGappsTool.VhdxHelper
             get
             {
                 return fs.VolumeLabel;
+            }
+        }
+
+        /// <summary>
+        /// Returns filesystem instance used by the class
+        /// </summary>
+        public NtfsFileSystem FilesystemInstance
+        {
+            get
+            {
+                return fs;
             }
         }
 
@@ -417,6 +428,22 @@ namespace WsaGappsTool.VhdxHelper
         private long bytesToMegabytes(long bytes)
         {
             return bytes / BytesInMB;
+        }
+
+        public int TotalDirectoryCount
+        {
+            get
+            {
+                return fs.GetDirectories(fs.Root.FullName, "*", SearchOption.AllDirectories).Count();
+            }
+        }
+
+        public int TotalFileCount
+        {
+            get
+            {
+                return fs.GetFiles(fs.Root.FullName, "*", SearchOption.AllDirectories).Count();
+            }
         }
 
         public void Dispose()
