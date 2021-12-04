@@ -42,5 +42,18 @@ namespace WsaGappsTool
             }
             return availableVirtualMemory;
         }
+
+        public static bool IsHyperVEnabled()
+        {
+            bool hyperVEnabled = false;
+            ObjectQuery objectQuery = new ObjectQuery("SELECT * FROM Win32_ComputerSystem");
+            ManagementObjectSearcher managementObjectSearcher = new ManagementObjectSearcher(objectQuery);
+            ManagementObjectCollection managementObjectCollection = managementObjectSearcher.Get();
+            foreach (ManagementObject managementObject in managementObjectCollection)
+            {
+                hyperVEnabled = (bool)managementObject["HypervisorPresent"];
+            }
+            return hyperVEnabled;
+        }
     }
 }
