@@ -1,4 +1,7 @@
-﻿using System;
+﻿using DiscUtils;
+using DiscUtils.Ntfs;
+using DiscUtils.Vhdx;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -46,7 +49,7 @@ namespace WsaGappsTool
                 CloseWithError("Not enough system memory left to start VM.");
             }
 
-            QemuRunCommandArgs = String.Format(@"-no-user-config -display {2} -serial stdio -net nic -net user -M pc -smp cores={0} -m {1} -device ich9-intel-hda -device ich9-ahci,id=sata -device ide-hd,bus=sata.2,drive=os,bootindex=0 -drive id=os,if=none,file=system.qcow2,format=qcow2,snapshot=on -device ide-hd,bus=sata.3,drive=DATA -drive id=DATA,if=none,file=data.vhdx,format=vhdx -device ide-hd,bus=sata.4,drive=CONFIG -drive id=CONFIG,if=none,file=config.vhdx,format=vhdx", cores, config.DefaultVmMemoryAllocationAmount, EvaluateBool(qemu_showWindow, trueValue: "sdl", falseValue: "none"));
+            QemuRunCommandArgs = String.Format(@"-no-user-config -display {2} -serial stdio -net nic -net user -M pc{3} -smp cores={0} -m {1} -device ich9-intel-hda -device ich9-ahci,id=sata -device ide-hd,bus=sata.2,drive=os,bootindex=0 -drive id=os,if=none,file=system.qcow2,format=qcow2,snapshot=on -device ide-hd,bus=sata.3,drive=DATA -drive id=DATA,if=none,file=data.vhdx,format=vhdx -device ide-hd,bus=sata.4,drive=CONFIG -drive id=CONFIG,if=none,file=config.vhdx,format=vhdx", cores, config.DefaultVmMemoryAllocationAmount, EvaluateBool(qemu_showWindow, trueValue: "sdl", falseValue: "none"), EvaluateBool(SystemInfo.IsHyperVEnabled(), trueValue: " --accel whpx", falseValue: ""));
             backgroundWorker_qemuVm.RunWorkerAsync();
         }
 
@@ -123,18 +126,18 @@ namespace WsaGappsTool
             qemuProcess.BeginOutputReadLine();
             qemuProcess.BeginErrorReadLine();
 
+            this.Invoke((MethodInvoker)delegate
+            {
+                progressBar.Style = ProgressBarStyle.Marquee;
+            });
+
             //setStatusText("Waiting up to 120 seconds for VM to come alive...");
             setStatusText("Waiting for VM to come alive...");
         }
 
         private void QemuProcess_Exited(object sender, EventArgs e)
         {
-            this.Invoke((MethodInvoker) delegate
-            {
-                setStatusText("Process complete!");
-                progressBar1.Style = ProgressBarStyle.Blocks;
-                progressBar1.Value = 100;
-            });
+            backgroundWorker_copyFiles.RunWorkerAsync();
         }
 
         private void QemuProcess_OutputDataReceived(object sender, DataReceivedEventArgs e)
@@ -165,6 +168,62 @@ namespace WsaGappsTool
         }
 
         private void QemuProcess_ErrorDataReceived(object sender, DataReceivedEventArgs e)
+        {
+
+        }
+
+        private void backgroundWorker_copyFiles_DoWork(object sender, DoWorkEventArgs e)
+        {
+            // Initialize DiscUtils
+            setStatusText("Opening disk...");
+            var assembly = System.Reflection.Assembly.GetExecutingAssembly();
+            DiscUtils.Setup.SetupHelper.RegisterAssembly(assembly);
+            DiscUtils.Containers.SetupHelper.SetupContainers();
+            DiscUtils.Complete.SetupHelper.SetupComplete();
+            DiscUtils.FileSystems.SetupHelper.SetupFileSystems();
+
+            string offloadPath = config.CacheDirectory + "offload/";
+            Directory.CreateDirectory(offloadPath);
+
+            setStatusText("Preparing to copy files from disk...");
+            this.Invoke((MethodInvoker)delegate
+            {
+                cancelButton.Enabled = false;
+                progressBar.Style = ProgressBarStyle.Continuous;
+                progressBar.Value = 0;
+            });
+
+            using (VirtualDisk vd = VirtualDisk.OpenDisk(config.vm_dataDiskImage, FileAccess.Read))
+            {
+                using (NtfsFileSystem ntfsFileSystem = new NtfsFileSystem(vd.Partitions[0].Open()))
+                {
+                    string[] images = ntfsFileSystem.GetFiles("images", "*.img", SearchOption.AllDirectories);
+                    int currentIndex = 0;
+                    foreach(string image in images)
+                    {
+                        string imageFilename = Path.GetFileName(image);
+                        setStatusText(String.Format("Copying {0}...", imageFilename));
+                        this.Invoke((MethodInvoker)delegate
+                        {
+                            progressBar.Value = (int)(currentIndex / images.Count());
+                        });
+                        FileStream fileStream = File.Create(offloadPath + imageFilename);
+                        ntfsFileSystem.OpenFile(image, FileMode.Open).CopyTo(fileStream);
+                        currentIndex++;
+                    }
+                }
+            }
+
+            this.Invoke((MethodInvoker)delegate
+            {
+                cancelButton.Enabled = true;
+                setStatusText("Process complete!");
+                progressBar.Style = ProgressBarStyle.Blocks;
+                progressBar.Value = 100;
+            });
+        }
+
+        private void backgroundWorker_copyFiles_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
 
         }
