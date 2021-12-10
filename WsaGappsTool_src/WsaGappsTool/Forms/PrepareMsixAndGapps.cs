@@ -18,6 +18,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using WsaGappsTool.VhdxHelper;
 using WsaGappsTool.Resources;
+using Microsoft.WindowsAPICodePack.Shell;
 
 namespace WsaGappsTool
 {
@@ -46,6 +47,9 @@ namespace WsaGappsTool
         string MsixPath = "";
         string GappsPath = "";
         private bool closing = false;
+
+        int msixDownloadProgress = 0;
+        int gappsDownloadProgress = 0;
 
         public PrepareMsixAndGapps()
         {
@@ -251,13 +255,17 @@ namespace WsaGappsTool
                 {
                     label_processStatus.Text = String.Format("Downloading MSIX package ({0} bytes / {1} bytes)...", e.BytesReceived, e.TotalBytesToReceive);
                     progressBar1.Value = e.ProgressPercentage;
+                    //SetProgress(e.ProgressPercentage, false);
                 }
             }
             else
             {
                 label_processStatus.Text = String.Format("Downloading MSIX package ({0} bytes / {1} bytes)...", e.BytesReceived, e.TotalBytesToReceive);
                 progressBar1.Value = e.ProgressPercentage;
+                //SetProgress(e.ProgressPercentage, false);
             }
+            msixDownloadProgress = e.ProgressPercentage;
+            Taskbar_UpdateDownloadProgress();
         }
 
         private void Gapps_webClient_DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
@@ -268,13 +276,17 @@ namespace WsaGappsTool
                 {
                     label_processStatus.Text = String.Format("Downloading gapps package ({0} bytes / {1} bytes)...", e.BytesReceived, e.TotalBytesToReceive);
                     progressBar1.Value = e.ProgressPercentage;
+                    //SetProgress(e.ProgressPercentage, false);
                 }
             }
             else
             {
                 label_processStatus.Text = String.Format("Downloading gapps package ({0} bytes / {1} bytes)...", e.BytesReceived, e.TotalBytesToReceive);
                 progressBar1.Value = e.ProgressPercentage;
+                //SetProgress(e.ProgressPercentage, false);
             }
+            gappsDownloadProgress = e.ProgressPercentage;
+            Taskbar_UpdateDownloadProgress();
         }
 
         private void Msix_webClient_DownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
@@ -521,12 +533,54 @@ namespace WsaGappsTool
                 progressBar1.Style = ProgressBarStyle.Blocks;
                 progressBar1.Value = 100;
                 Close();
-            });            
+            });
         }
 
         private void PrepareMsixAndGapps_FormClosing(object sender, FormClosingEventArgs e)
         {
 
+        }
+
+        void SetProgress(int value, bool failed)
+        {
+            var taskbar = Microsoft.WindowsAPICodePack.Taskbar.TaskbarManager.Instance;
+            taskbar.SetProgressValue(value, 100);
+            if (!failed)
+            {
+                taskbar.SetProgressState(Microsoft.WindowsAPICodePack.Taskbar.TaskbarProgressBarState.Normal);
+            }
+            else
+            {
+                taskbar.SetProgressState(Microsoft.WindowsAPICodePack.Taskbar.TaskbarProgressBarState.Error);
+            }
+        }
+
+        void Taskbar_UpdateDownloadProgress()
+        {
+            var taskbar = Microsoft.WindowsAPICodePack.Taskbar.TaskbarManager.Instance;
+            taskbar.SetProgressState(Microsoft.WindowsAPICodePack.Taskbar.TaskbarProgressBarState.Normal);
+            try
+            {
+                if (downloadMsix && downloadGapps)
+                {
+                    taskbar.SetProgressValue(gappsDownloadProgress + msixDownloadProgress, 200);
+                }
+                else
+                {
+                    if (downloadMsix)
+                    {
+                        taskbar.SetProgressValue(msixDownloadProgress, 100);
+                    }
+                    else
+                    {
+                        taskbar.SetProgressValue(gappsDownloadProgress, 100);
+                    }
+                }
+            }
+            catch
+            {
+
+            }
         }
     }
 }
