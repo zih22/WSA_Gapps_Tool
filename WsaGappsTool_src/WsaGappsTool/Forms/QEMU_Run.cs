@@ -100,6 +100,7 @@ namespace WsaGappsTool
         void SetExit()
         {
             CanClose = true;
+            cancelButton.Enabled = true;
             cancelButton.Text = "Close";
         }
 
@@ -145,11 +146,56 @@ namespace WsaGappsTool
 
         private void QemuProcess_Exited(object sender, EventArgs e)
         {
-            this.Invoke((MethodInvoker) delegate
+            if (ProcessSuccessful)
             {
-                if (ProcessSuccessful)
+                backgroundWorker_copyFiles.RunWorkerAsync();
+            }
+            else
+            {
+                setStatusText("Something went wrong during processing.");
+                this.Invoke((MethodInvoker)delegate
                 {
-// Initialize DiscUtils
+                    progressBar.Style = ProgressBarStyle.Blocks;
+                    progressBar.Value = 100;
+                });
+            }
+        }
+
+        private void QemuProcess_OutputDataReceived(object sender, DataReceivedEventArgs e)
+        {
+            if (e.Data != null)
+            {
+                if (e.Data.Contains("Ready"))
+                {
+                    setStatusText("VM is running. Getting ready...");
+                }
+                else if (e.Data.Contains(error_gappsNotFound))
+                {
+                    CloseWithError(error_gappsNotFound);
+                }
+                else if (e.Data.Contains(error_systemImagesNotFound))
+                {
+                    CloseWithError(error_systemImagesNotFound);
+                }
+                else if (e.Data.Contains("Done"))
+                {
+                    setStatusText("Process complete. VM is now shutting down...");
+                }
+                else
+                {
+                    setStatusText(e.Data);
+                }
+            }
+        }
+
+        private void QemuProcess_ErrorDataReceived(object sender, DataReceivedEventArgs e)
+        {
+
+        }
+
+        private void backgroundWorker_copyFiles_DoWork(object sender, DoWorkEventArgs e)
+        {
+            // Initialize DiscUtils
             setStatusText("Opening disk...");
             var assembly = System.Reflection.Assembly.GetExecutingAssembly();
             DiscUtils.Setup.SetupHelper.RegisterAssembly(assembly);
@@ -187,75 +233,21 @@ namespace WsaGappsTool
                     }
                 }
             }
-
+            setStatusText("Finishing up...");
             Directory.Move(config.CacheDirectory + "msix", "C:/WSA");
-
-            this.Invoke((MethodInvoker)delegate
-            {
-                cancelButton.Enabled = true;
-                cancelButton.Text = "Close";
-                setStatusText("Process complete!");
-                progressBar.Style = ProgressBarStyle.Blocks;
-                progressBar.Value = 100;
-            });
-
-            Directory.Delete(config.CacheDirectory);
-                }
-                else
-                {
-                    setStatusText("Something went wrong during processing.");
-                    progressBar1.Style = ProgressBarStyle.Blocks;
-                    progressBar1.Value = 100;
-                }
-
-        }
-
-        private void QemuProcess_Exited(object sender, EventArgs e)
-        {
-            //backgroundWorker_qemuVm.CancelAsync();
-            //backgroundWorker_copyFiles.RunWorkerAsync();
-        }
-
-        private void QemuProcess_OutputDataReceived(object sender, DataReceivedEventArgs e)
-        {
-            if (e.Data != null)
-            {
-                if (e.Data.Contains("Ready"))
-                {
-                    setStatusText("VM is running. Getting ready...");
-                }
-                else if (e.Data.Contains(error_gappsNotFound))
-                {
-                    CloseWithError(error_gappsNotFound);
-                }
-                else if (e.Data.Contains(error_systemImagesNotFound))
-                {
-                    CloseWithError(error_systemImagesNotFound);
-                }
-                else if (e.Data.Contains("Done"))
-                {
-                    setStatusText("Process complete. VM is now shutting down...");
-                }
-                else
-                {
-                    setStatusText(e.Data);
-                }
-            }
-        }
-
-        private void QemuProcess_ErrorDataReceived(object sender, DataReceivedEventArgs e)
-        {
-
-        }
-
-        private void backgroundWorker_copyFiles_DoWork(object sender, DoWorkEventArgs e)
-        {
-
         }
 
         private void backgroundWorker_copyFiles_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
+            this.Invoke((MethodInvoker)delegate
+            {
+                setStatusText("Process complete!");
+                progressBar.Style = ProgressBarStyle.Blocks;
+                progressBar.Value = 100;
+                SetExit();
+            });
 
+            Directory.Delete(config.CacheDirectory);
         }
 
         private void cancelButton_Click(object sender, EventArgs e)
