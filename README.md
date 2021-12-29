@@ -2,6 +2,8 @@
 
 Simple tool for adding Google apps and services to WSA system images, without the need for WSL (or having to interact with a terminal).
 
+Note: Archive is ~700 MB
+
 ## How it works (In-depth)
 Step 1: When the user clicks the Start button on the main window, the application will create a folder in the same location as itself named `cache`, and will use it to prepare the required files. First, it checks to see if it needs to download the latest Android 11 gapps package and/or the WSA MSIX application package (and does so if needed), then it begins getting everything ready.
 
