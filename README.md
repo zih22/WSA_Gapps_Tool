@@ -48,7 +48,7 @@ NOTE: Download uses ~900MB. Minimum free space required is 8 GB.
 
 - **Step 2:** Open File Explorer, and navigate to the directory where you downloaded/extracted the repository. Open the `bin` directory at the repository root, and run `WsaGappsTool.exe`. If `bin` does not exist, you will need to build the solution. Follow the steps under [Building](#building).
 - **Step 3:** When the application opens, you will be asked to specify the paths of the WSA MSIX package, and the gapps pico package. If you did not download these, leave the boxes empty. The application will automatically download these files when the process starts.
-- **Step 4:** Click the Start button. The process will begin.
+- **Step 4:** Click the Start button. The process will begin. You no longer need to interact with the application. Depending on the speed of your system, the process will take 20+ minutes.
 
 **NOTE: If your machine does not meet all the hardware requirements as listed [above](#minimum-requirements), it's a good idea to close as many applications as you can to free up memory and CPU resources.
 
