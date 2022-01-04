@@ -2,7 +2,7 @@
 
 Simple tool for adding Google apps and services to WSA system images, without the need for WSL (or having to interact with a terminal).
 
-Note: Archive is ~700 MB
+Note: This tool **only** runs on Windows. Targets .NET 4.7.2.
 
 ## How it works (In-depth)
 Step 1: When the user clicks the Start button on the main window, the application will create a folder in the same location as itself named `cache`, and will use it to prepare the required files. First, it checks to see if it needs to download the latest Android 11 gapps package and/or the WSA MSIX application package (and does so if needed), then it begins getting everything ready.
@@ -25,4 +25,18 @@ Once QEMU is started, Arch will begin booting. When it is finished booting, it w
 
 The script then mounts the data drive (`/dev/sdb1`), and checks to see if the files it is expecting are there. Once it verifies that they are, it can begin. In a nutshell, the Android system images are mounted, the contents of the gapps package are copied to the images, the permissions are set as needed, and then the images are finalized and unmounted. The modification process is now complete. The VM sends the `complete` signal through the serial port, and then runs `cleanup.sh` (located alongside `run.sh`), which unmounts everything (to prevent data corruption), and shuts the virtual machine down.
 
-Step 6: Once the VM shuts down, the application extracts the contents of `data.vhdx` and copies the new modified images to `cache/msix`, replacing the ones that were there before. It then moves the MSIX folder to `C:/`, renaming it `WSA`, and calls 
+Step 6: Once the VM shuts down, the application extracts the contents of `data.vhdx` and copies the new modified images to `cache/msix`, replacing the ones that were there before. It then moves the MSIX folder to `C:/`, renaming it `WSA`, and calls the PowerShell command `Add-AppxPackage` to "install" the package and make it usable.
+
+## Building
+**Requires Visual Studio 2022 Community or later.**
+- **Step 1:** Open Visual Studio, and click "Clone a repository" under the "Get started" section on the start page. Alternatively, you can just [download the repository](https://github.com/JosephM101/WSA_Gapps_Tool/archive/refs/heads/main.zip). The solution is located in the `WsaGappsTool_src` folder.
+- **Step 2:** When the solution is opened, right-click on the solution in `Solution Explorer`, and click `Restore NuGet packages`. Wait until that completes.
+- **Step 3:** Build the solution. You can do this by either pressing <kbd>F6</kbd>, or by going to the top of the window and clicking Build -> Build Solution.
+- **Step 4:** If the build was successful, there should be a new folder named `bin` at the root of the repository containing the application itself and its required files.
+
+## Usage
+- **Step 1:** [Download the repository as a zip file.](https://github.com/JosephM101/WSA_Gapps_Tool/archive/refs/heads/main.zip)
+
+NOTE: Download uses ~900MB. Minimum free space required is 8 GB.
+
+- **Step 2:** Open File Explorer, and navigate to the directory where you downloaded/extracted the repository. Open the `bin` directory at the repository root, and run the application. If this directory does not exist, you will need to build the solution. Follow the steps under [Building](#building).
