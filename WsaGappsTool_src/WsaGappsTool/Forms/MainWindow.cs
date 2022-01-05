@@ -61,7 +61,7 @@ namespace WsaGappsTool
                 {
                     QEMU_Run qemu = new QEMU_Run();
                     DialogResult qemuResult = qemu.ShowDialog();
-                    if (result == DialogResult.Abort && qemu.error)
+                    if (!qemu.ProcessSuccessful)
                     {
                         MessageBox.Show(String.Format("Error modifying images: {0}", qemu.errorMessage), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
@@ -114,11 +114,11 @@ namespace WsaGappsTool
             {
                 if (textBox_gappsPackagePath.TextLength < 1)
                 {
-                    summaryLabel.Text = String.Format("{0} will be downloaded", msixStr);
+                    summaryLabel.Text = String.Format("{0} will be downloaded", gappsStr);
                 }
                 else if (textBox_msixPackagePath.TextLength < 1)
                 {
-                    summaryLabel.Text = String.Format("{0} will be downloaded", gappsStr);
+                    summaryLabel.Text = String.Format("{0} will be downloaded", msixStr);
                 }
                 else
                 {
