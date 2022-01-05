@@ -20,5 +20,7 @@ namespace WsaGappsTool
         public static int DefaultVmMemoryAllocationAmount = 1024;
 
         public static string Vm_ExpandSystemImageArgs = @"x system/system.7z.001";
+
+        public static string DefaultOutputDirectory = @"C:\WSA";
     }
 }
