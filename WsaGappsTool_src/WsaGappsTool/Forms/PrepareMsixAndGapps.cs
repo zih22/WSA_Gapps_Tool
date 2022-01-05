@@ -18,6 +18,9 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using WsaGappsTool.VhdxHelper;
 using WsaGappsTool.Resources;
+//using ICSharpCode.SharpZipLib.Zip;
+using Ionic;
+using Ionic.Zip;
 //using Microsoft.WindowsAPICodePack.Shell;
 
 namespace WsaGappsTool
@@ -437,16 +440,20 @@ namespace WsaGappsTool
             // Extract MSIX archive
             Regex x64_regex = new Regex(@"_x64_");
             string msixExtractPath = config.CacheDirectory + "msix/";
-            ICSharpCode.SharpZipLib.Zip.FastZip unzipper = new ICSharpCode.SharpZipLib.Zip.FastZip();
+
             if (!Directory.Exists(msixExtractPath))
             {
                 Directory.CreateDirectory(msixExtractPath);
             }
+
+            ICSharpCode.SharpZipLib.Zip.FastZip unzipper = new ICSharpCode.SharpZipLib.Zip.FastZip();
+
             unzipper.ExtractZip(MsixPath, msixExtractPath, x64_regex.ToString());
 
             // Look for package that contains x64 in title using match regex
             string[] files = Directory.GetFiles(msixExtractPath, "*.msix");
             string x64_package = "";
+
             foreach (string file in files)
             {
                 if (x64_regex.IsMatch(Path.GetFileName(file)))
@@ -457,22 +464,48 @@ namespace WsaGappsTool
             }
 
             //Debug.WriteLine("Package: " + x64_package);
+
             unzipper.ExtractZip(x64_package, msixExtractPath, null);
+
+            //this.Invoke((MethodInvoker)delegate
+            //{
+            //    progressBar1.Style = ProgressBarStyle.Blocks;
+            //});
+
+            //ZipFile zipFile = ZipFile.Read(x64_package);
+            //zipFile.ExtractProgress += (o, i) =>
+            //{
+            //    double perc = i.BytesTransferred / i.TotalBytesToTransfer;
+            //    int percentage_F = (int)Math.Round(perc * 100, 0);
+            //    this.Invoke((MethodInvoker)delegate
+            //    {
+            //        progressBar1.Value = percentage_F;
+            //    });
+            //};
+            //
+            //zipFile.ExtractAll(msixExtractPath);
+
+            //this.Invoke((MethodInvoker)delegate
+            //{
+            //    progressBar1.Style = ProgressBarStyle.Marquee;
+            //});
+
+            //zipFile.Dispose();
 
             // Delete MSIX
             File.Delete(x64_package);
 
             List<string> FilesToDelete = new List<string>
-                {
-                    "AppxBlockMap.xml",
-                    "AppxSignature.p7x",
-                    "[Content_Types].xml"
-                };
+            {
+                "AppxBlockMap.xml",
+                "AppxSignature.p7x",
+                "[Content_Types].xml"
+            };
 
             List<string> FoldersToDelete = new List<string>
-                {
-                    "AppxMetadata"
-                };
+            {
+                "AppxMetadata"
+            };
 
             // Delete files
             foreach (string file in FilesToDelete)
@@ -485,17 +518,17 @@ namespace WsaGappsTool
                     Directory.Delete(msixExtractPath + folder, true);
 
             // Check if data.vhdx already exists, and delete it if it does
-            setStatusText("Checking for existing data image...");
+            setStatusText("[VM] Checking for existing data image...");
             if (File.Exists(config.vm_dataDiskImage))
             {
-                setStatusText("Deleting existing image...");
+                setStatusText("[VM] Deleting existing image...");
                 File.Delete(config.vm_dataDiskImage);
             }
 
-            setStatusText("Creating new data image...");
-            string vhdx_temp = Resources.Paths.VHDX_Contents_TempDir;
-            string vhdx_temp_gapps = Resources.Paths.VHDX_Contents_TempDir_Gapps;
-            string vhdx_temp_images = Resources.Paths.VHDX_Contents_TempDir_Images;
+            setStatusText("[VM] Creating new data image...");
+            string vhdx_temp = Paths.VHDX_Contents_TempDir;
+            string vhdx_temp_gapps = Paths.VHDX_Contents_TempDir_Gapps;
+            string vhdx_temp_images = Paths.VHDX_Contents_TempDir_Images;
             Directory.CreateDirectory(vhdx_temp);
             Directory.CreateDirectory(vhdx_temp_gapps);
             Directory.CreateDirectory(vhdx_temp_images);
@@ -519,6 +552,7 @@ namespace WsaGappsTool
             {
                 cancelButton.Enabled = false;
             });
+
             Thread.Sleep(2000); // Sleep for 2 seconds to allow things to catch up
             // Clean up
             Directory.Delete(vhdx_temp, true);

@@ -20,56 +20,167 @@ namespace WsaGappsTool
         public Form1()
         {
             InitializeComponent();
-            // Debug.WriteLine(SystemInfo.GetAvailablePhysicalMemory());
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
             performPathChecks();
+            textBox_outputDirectory.Text = config.DefaultOutputDirectory;
         }
 
         // NOT USED
         private void automaticInstallationToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (MessageBox.Show("The automatic installation feature downloads both the WSA .msix package and the latest gapps package, then automatically begins the modification process. \n\nThis feature is experimental, and therefore may not operate as intended. \n\nWould you like to continue anyway?", "Automatic installation", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            if (MessageBox.Show("The automatic installation feature downloads both the WSA msix package and the latest gapps package, then automatically begins the modification process. \n\nThis feature is experimental, and therefore may not operate as intended. \n\nWould you like to continue anyway?", "Automatic installation", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
                 // Run
+            }
+        }
+
+        void RunProcess()
+        {
+            string driveLetter;
+            if (IsDriveTooSmall(out driveLetter))
+            {
+                MessageBox.Show(String.Format("Error starting process: Drive {0} has less than 8GB of space available. Free up space on the drive, then try again.", driveLetter), "Not enough space", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            else
+            {
+                string message = "This process might take a while. Continue?";
+                if (MessageBox.Show(message, Resources.Resources.Config_AppName, MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                {
+                    PrepareMsixAndGapps prepareMsixAndGapps = new PrepareMsixAndGapps(textBox_msixPackagePath.Text, textBox_gappsPackagePath.Text);
+                    DialogResult result = prepareMsixAndGapps.ShowDialog();
+                    if (result == DialogResult.Abort && prepareMsixAndGapps.error)
+                    {
+                        MessageBox.Show(String.Format("Error preparing files: {0}", prepareMsixAndGapps.errorMessage), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    else
+                    {
+                        QEMU_Run qemu = new QEMU_Run(textBox_outputDirectory.Text, checkBox_installPackage.Checked);
+                        DialogResult qemuResult = qemu.ShowDialog();
+                        if (!qemu.ProcessSuccessful)
+                        {
+                            MessageBox.Show(String.Format("Error modifying images: {0}", qemu.errorMessage), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            try
+                            {
+                                KillAllQEMUProcesses();
+                            }
+                            catch
+                            {
+
+                            }
+                        }
+                        else
+                        {
+                            if(checkBox_openDirectoryWhenComplete.Checked)
+                            {
+                                Process.Start(textBox_outputDirectory.Text);
+                            }
+                            MessageBox.Show("Process complete!", "Done!", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
+                    }
+                }
+            }
+        }
+
+        void KillAllQEMUProcesses()
+        {
+            // Find all processes of the QEMU executable
+            string qemu = Paths.QemuExe;
+            // Get processes by executable
+            Process[] qemuProcesses = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(qemu));
+            Process[] qemuProcesses2 = Process.GetProcessesByName(Path.GetFileName(qemu));
+            foreach (Process qemuProcess in qemuProcesses)
+            {
+                qemuProcess.Kill();
+            }
+            foreach (Process qemuProcess in qemuProcesses2)
+            {
+                qemuProcess.Kill();
             }
         }
 
         private void startButton_Click(object sender, EventArgs e)
         {
             //string message = "This process might take a while (~10-15 minutes). Are you sure you want to continue?";
-            string message = "This process might take a while. Continue?";
-            if (MessageBox.Show(message, Resources.Resources.Config_AppName, MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            string outputPath = textBox_outputDirectory.Text;
+            if (outputPath != "")
             {
-                PrepareMsixAndGapps prepareMsixAndGapps = new PrepareMsixAndGapps(textBox_msixPackagePath.Text, textBox_gappsPackagePath.Text);
-                DialogResult result = prepareMsixAndGapps.ShowDialog();
-                if (result == DialogResult.Abort && prepareMsixAndGapps.error)
+                bool PathIsValid = true;
+                foreach (char c in Path.GetInvalidPathChars())
                 {
-                    MessageBox.Show(String.Format("Error preparing: {0}", prepareMsixAndGapps.errorMessage), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    try
+                    if (outputPath.Contains(c))
                     {
-                        //Directory.Delete(config.CacheDirectory, true);
+                        PathIsValid = false;
+                        break;
                     }
-                    catch (Exception)
-                    {
-
-                    }
+                }
+                if (!PathIsValid)
+                {
+                    MessageBox.Show("Error starting process: The output path contains invalid characters.", "Invalid path", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
                 else
                 {
-                    QEMU_Run qemu = new QEMU_Run();
-                    DialogResult qemuResult = qemu.ShowDialog();
-                    if (!qemu.ProcessSuccessful)
+                    if (Directory.Exists(outputPath))
                     {
-                        MessageBox.Show(String.Format("Error modifying images: {0}", qemu.errorMessage), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        if (IsDirectoryEmpty(outputPath))
+                        {
+                            RunProcess();
+                        }
+                        else
+                        {
+                            MessageBox.Show("Error starting process: The output directory is not empty.", "Directory not empty", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
                     }
                     else
                     {
-                        MessageBox.Show("Process complete!", "Done!", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        if (MessageBox.Show("The output directory does not exist. Would you like to create it?", "Directory does not exist", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                        {
+                            Directory.CreateDirectory(outputPath);
+                            RunProcess();
+                        }
+                        else
+                        {
+                            MessageBox.Show("Process was cancelled.", "Process cancelled", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
                     }
                 }
+            }
+            else
+            {
+                MessageBox.Show("Output path must be specified.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        bool IsDirectoryEmpty(string path)
+        {
+            // string[] files = Directory.GetFiles(path);
+            // string[] directories = Directory.GetDirectories(path);
+            // 
+            // if (files.Length > 0 || directories.Length > 0)
+            // {
+            //     return false;
+            // }
+            // else return true;
+
+            return !Directory.EnumerateFileSystemEntries(path).Any();
+        }
+
+        bool IsDriveTooSmall(out string driveLetter)
+        {
+            // Get the drive we're running on
+            FileInfo fileInfo = new FileInfo(Application.StartupPath);
+            driveLetter = fileInfo.Directory.Root.FullName;
+            DriveInfo driveInfo = new DriveInfo(driveLetter);
+            long freeSpace = driveInfo.AvailableFreeSpace / 1024 / 1024;
+            if (freeSpace < 8192) // 8GB
+            {
+                return true;
+            }
+            else
+            {
+                return false;
             }
         }
 
