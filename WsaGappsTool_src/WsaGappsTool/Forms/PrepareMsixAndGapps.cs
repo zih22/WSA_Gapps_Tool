@@ -511,10 +511,10 @@ namespace WsaGappsTool
             setStatusText("Copying files...");
             VhdxBuilder.CreateFromDirectory(vhdx_temp, config.vm_dataDiskImage, "WSA_Data", config.DefaultDataDiskImageSizeMB).Close(); // Create a virtual VHDX image, and copy the contents of the temporary folder to it
 
-            setStatusText("Image created");
+            setStatusText("Preparation complete. Getting ready to start VM...");
+            //setStatusText("Image created");
             Thread.Sleep(2000);
 
-            setStatusText("Finishing up...");
             this.Invoke((MethodInvoker)delegate
             {
                 cancelButton.Enabled = false;

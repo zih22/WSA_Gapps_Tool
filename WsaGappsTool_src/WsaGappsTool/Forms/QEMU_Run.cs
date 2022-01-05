@@ -12,6 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Management.Automation;
 
 namespace WsaGappsTool
 {
@@ -26,16 +27,25 @@ namespace WsaGappsTool
         public bool error;
         public string errorMessage = "";
 
-        public bool qemu_showWindow = false;
+        public bool qemu_showWindow = false; //Enable to show the QEMU window for debugging purposes
 
         public static string QemuRunCommandArgs = "";
 
-        bool ProcessSuccessful = false;
-        bool CanClose = false;
+        public bool ProcessSuccessful = false;
+        //bool CanClose = false;
+
+        string WSA_InstallPath = "C:\\  WSA";
+        string WSA_AppxManifestPath;
+
+        PerformanceCounter pCounter_usedMemory;
+        PerformanceCounter pCounter_cpuUsage;
+        PerformanceCounter pCounter_diskWrite;
+        PerformanceCounter pCounter_diskRead;
 
         public QEMU_Run()
         {
             InitializeComponent();
+            WSA_AppxManifestPath = Path.Combine(WSA_InstallPath, "AppxManifest.xml");
         }
 
         private void QEMU_Run_Load(object sender, EventArgs e)
@@ -49,7 +59,7 @@ namespace WsaGappsTool
 
             if (availableMemoryInMB < config.MinAvailableSystemRamForVm_MB)
             {
-                CloseWithError("Not enough system memory left to start VM.");
+                //CloseWithError("Not enough system memory left to start VM.");
             }
 
             QemuRunCommandArgs = String.Format(@"-no-user-config -display {2} -serial stdio -net nic -net user -M pc{3} -smp cores={0} -m {1} -device ich9-intel-hda -device ich9-ahci,id=sata -device ide-hd,bus=sata.2,drive=os,bootindex=0 -drive id=os,if=none,file=system.qcow2,format=qcow2,snapshot=on -device ide-hd,bus=sata.3,drive=DATA -drive id=DATA,if=none,file=data.vhdx,format=vhdx -device ide-hd,bus=sata.4,drive=CONFIG -drive id=CONFIG,if=none,file=config.vhdx,format=vhdx", cores, config.DefaultVmMemoryAllocationAmount, EvaluateBool(qemu_showWindow, trueValue: "sdl", falseValue: "none"), EvaluateBool(SystemInfo.IsHyperVEnabled(), trueValue: " --accel whpx", falseValue: ""));
@@ -99,7 +109,7 @@ namespace WsaGappsTool
 
         void SetExit()
         {
-            CanClose = true;
+            //CanClose = true;
             cancelButton.Enabled = true;
             cancelButton.Text = "Close";
         }
@@ -134,6 +144,18 @@ namespace WsaGappsTool
             qemuProcess.BeginOutputReadLine();
             qemuProcess.BeginErrorReadLine();
 
+            pCounter_cpuUsage = new PerformanceCounter("Process", "% Processor Time", qemuProcess.ProcessName);
+            pCounter_usedMemory = new PerformanceCounter("Process", "Working Set - Private", qemuProcess.ProcessName);
+            pCounter_diskWrite = new PerformanceCounter("PhysicalDisk", "Disk Write Bytes/sec", qemuProcess.ProcessName);
+            pCounter_diskRead = new PerformanceCounter("PhysicalDisk", "Disk Read Bytes/sec", qemuProcess.ProcessName);
+
+            timer_performanceCounters.Enabled = true;
+
+            while (!this.IsHandleCreated)
+            {
+                // Do nothing; just wait
+            }
+
             this.Invoke((MethodInvoker)delegate
             {
                 progressBar.Style = ProgressBarStyle.Marquee;
@@ -142,9 +164,10 @@ namespace WsaGappsTool
             //setStatusText("Waiting up to 120 seconds for VM to come alive...");
             setStatusText("Waiting for VM to come alive...");
             qemuProcess.WaitForExit();
+            VerifyProcessWasSuccessful();
         }
 
-        private void QemuProcess_Exited(object sender, EventArgs e)
+        void VerifyProcessWasSuccessful()
         {
             if (ProcessSuccessful)
             {
@@ -159,6 +182,11 @@ namespace WsaGappsTool
                     progressBar.Value = 100;
                 });
             }
+        }
+
+        private void QemuProcess_Exited(object sender, EventArgs e)
+        {
+
         }
 
         private void QemuProcess_OutputDataReceived(object sender, DataReceivedEventArgs e)
@@ -177,9 +205,10 @@ namespace WsaGappsTool
                 {
                     CloseWithError(error_systemImagesNotFound);
                 }
-                else if (e.Data.Contains("Done"))
+                else if (e.Data.Contains("Shutting down"))
                 {
                     setStatusText("Process complete. VM is now shutting down...");
+                    ProcessSuccessful = true;
                 }
                 else
                 {
@@ -233,8 +262,48 @@ namespace WsaGappsTool
                     }
                 }
             }
+            InstallPackage();
             setStatusText("Finishing up...");
-            Directory.Move(config.CacheDirectory + "msix", "C:/WSA");
+        }
+
+        bool InstallPackage()
+        {
+            setStatusText(String.Format("Moving package contents to {0}...", WSA_InstallPath));
+            if (!Directory.Exists(WSA_InstallPath))
+            {
+                Directory.CreateDirectory(WSA_InstallPath);
+            }
+            try
+            {
+                Directory.Move(config.CacheDirectory + "msix/*", WSA_InstallPath);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(String.Format("Could not move package contents to {1}: {0}", WSA_InstallPath, ex.Message), "Error deleting cache", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
+            string command = String.Format("Add-AppxPackage -Register {0}", WSA_AppxManifestPath);
+            setStatusText("Installing...");
+            PowerShell powerShell = PowerShell.Create();
+            powerShell.AddScript(command);
+            powerShell.Invoke();
+
+            if (powerShell.HadErrors)
+            {
+                string message = "";
+                string message_suffix = "You can try opening an elevated instance of PowerShell, and running the following command: \r\n\r\n" + command;
+                if (File.Exists(WSA_AppxManifestPath))
+                {
+                    message = String.Format("The package has been moved to C:/WSA, but the AppxManifest.xml file could not be registered. {0}", message_suffix);
+                }
+                else
+                {
+                    message = "Something happened, and the package couldn't be registered.";
+                }
+                MessageBox.Show(message, "Error registering AppxManifest.xml", MessageBoxButtons.OK, MessageBoxIcon.Question);
+            }
+
+            return !powerShell.HadErrors;
         }
 
         private void backgroundWorker_copyFiles_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -246,32 +315,71 @@ namespace WsaGappsTool
                 progressBar.Value = 100;
                 SetExit();
             });
-
-            Directory.Delete(config.CacheDirectory);
         }
 
         private void cancelButton_Click(object sender, EventArgs e)
         {
             if (cancelButton.Text == "Close")
             {
-                Close();
+                Exit();
             }
             else
             {
-                if (MessageBox.Show("Are you sure you want to cancel?", "Cancel?", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                if (MessageBox.Show("Are you sure you want to cancel the current operation?", "Cancel?", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                 {
                     backgroundWorker_qemuVm.CancelAsync();
-                    qemuProcess.Kill();
                     try
                     {
-                        Directory.Delete(config.CacheDirectory);
+                        qemuProcess.Kill();
                     }
                     catch
                     {
 
                     }
-                    Close();
+                    Exit();
                 }
+            }
+        }
+
+        void Exit()
+        {
+            //Directory.Delete(config.CacheDirectory);
+            AskAboutClearingCache();
+            Close();
+        }
+
+        void AskAboutClearingCache()
+        {
+            if (MessageBox.Show("Do you want to delete the cache directory? \r\n\r\n" + Path.GetFullPath(config.CacheDirectory), "Delete cache?", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                try
+                {
+                    Directory.Delete(config.CacheDirectory, true);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Cache directory could not be deleted. " + ex.Message, "Error deleting cache", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        private void timer_performanceCounters_Tick(object sender, EventArgs e)
+        {
+            try
+            {
+                // Get CPU usage percentage
+
+                // Get process memory usage
+
+                string mem_usage = String.Format("Memory Usage: {0:n1} MB", Math.Round((pCounter_usedMemory.NextValue() / 1024 / 1024), 1));
+
+                //Get disk write speed in MB/s
+                //string disk_write_speed = String.Format("Disk Write Speed: {0:n1} MB/s", Math.Round((pCounter_diskWrite.NextValue() / 1024 / 1024), 1));
+                label2.Text = mem_usage;
+            }
+            catch (Exception ex)
+            {
+                string exc = ex.Message;
             }
         }
     }
