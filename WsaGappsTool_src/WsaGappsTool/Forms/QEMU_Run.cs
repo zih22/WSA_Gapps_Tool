@@ -42,10 +42,20 @@ namespace WsaGappsTool
         PerformanceCounter pCounter_diskWrite;
         PerformanceCounter pCounter_diskRead;
 
-        public QEMU_Run()
+        bool installPackage;
+
+        string moreInfo_collapse_string = "Hide details";
+        string moreInfo_expand_string = "Show details";
+        bool panel_expanded = false;
+        int windowHeight_collapsed = 230;
+        int windowHeight_expanded = 380;
+
+        public QEMU_Run(string msixPackage_savePath, bool install)
         {
             InitializeComponent();
             WSA_AppxManifestPath = Path.Combine(WSA_InstallPath, "AppxManifest.xml");
+            installPackage = install;
+            linkLabel1.Text = moreInfo_expand_string;
         }
 
         private void QEMU_Run_Load(object sender, EventArgs e)
@@ -262,11 +272,15 @@ namespace WsaGappsTool
                     }
                 }
             }
-            InstallPackage();
+            MoveContents();
+            if (installPackage)
+            {
+                InstallPackage();
+            }
             setStatusText("Finishing up...");
         }
 
-        bool InstallPackage()
+        bool MoveContents()
         {
             setStatusText(String.Format("Moving package contents to {0}...", WSA_InstallPath));
             if (!Directory.Exists(WSA_InstallPath))
@@ -276,12 +290,17 @@ namespace WsaGappsTool
             try
             {
                 Directory.Move(config.CacheDirectory + "msix/*", WSA_InstallPath);
+                return true;
             }
             catch (Exception ex)
             {
-                MessageBox.Show(String.Format("Could not move package contents to {1}: {0}", WSA_InstallPath, ex.Message), "Error deleting cache", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(String.Format("Could not move package contents to {1}: {0}", WSA_InstallPath, ex.Message), "Error moving contents", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
             }
+        }
 
+        bool InstallPackage()
+        {
             string command = String.Format("Add-AppxPackage -Register {0}", WSA_AppxManifestPath);
             setStatusText("Installing...");
             PowerShell powerShell = PowerShell.Create();
@@ -302,7 +321,6 @@ namespace WsaGappsTool
                 }
                 MessageBox.Show(message, "Error registering AppxManifest.xml", MessageBoxButtons.OK, MessageBoxIcon.Question);
             }
-
             return !powerShell.HadErrors;
         }
 
@@ -380,6 +398,22 @@ namespace WsaGappsTool
             catch (Exception ex)
             {
                 string exc = ex.Message;
+            }
+        }
+
+        private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            if(panel_expanded)
+            {
+                this.Height = windowHeight_collapsed;
+                linkLabel1.Text = moreInfo_expand_string;
+                panel_expanded = false;
+            }
+            else
+            {
+                this.Height = windowHeight_expanded;
+                linkLabel1.Text = moreInfo_collapse_string;
+                panel_expanded = true;
             }
         }
     }
