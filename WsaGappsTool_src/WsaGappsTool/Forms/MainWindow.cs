@@ -28,15 +28,6 @@ namespace WsaGappsTool
             textBox_outputDirectory.Text = config.DefaultOutputDirectory;
         }
 
-        // NOT USED
-        private void automaticInstallationToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (MessageBox.Show("The automatic installation feature downloads both the WSA msix package and the latest gapps package, then automatically begins the modification process. \n\nThis feature is experimental, and therefore may not operate as intended. \n\nWould you like to continue anyway?", "Automatic installation", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
-            {
-                // Run
-            }
-        }
-
         void RunProcess()
         {
             string driveLetter;
@@ -49,7 +40,7 @@ namespace WsaGappsTool
                 string message = "This process might take a while. Continue?";
                 if (MessageBox.Show(message, Resources.Resources.Config_AppName, MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                 {
-                    PrepareMsixAndGapps prepareMsixAndGapps = new PrepareMsixAndGapps(textBox_msixPackagePath.Text, textBox_gappsPackagePath.Text);
+                    PrepareMsixAndGapps prepareMsixAndGapps = new PrepareMsixAndGapps(textBox_msixPackagePath.Text, textBox_gappsPackagePath.Text, SystemArchitecture.AMD64);
                     DialogResult result = prepareMsixAndGapps.ShowDialog();
                     if (result == DialogResult.Abort && prepareMsixAndGapps.error)
                     {

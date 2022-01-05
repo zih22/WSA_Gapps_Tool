@@ -43,7 +43,6 @@
             this.targetArchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.x64ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.arm64ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.automaticInstallationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -183,7 +182,6 @@
             // 
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.targetArchToolStripMenuItem,
-            this.automaticInstallationToolStripMenuItem,
             this.toolStripSeparator2,
             this.exitToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
@@ -196,7 +194,7 @@
             this.x64ToolStripMenuItem,
             this.arm64ToolStripMenuItem});
             this.targetArchToolStripMenuItem.Name = "targetArchToolStripMenuItem";
-            this.targetArchToolStripMenuItem.Size = new System.Drawing.Size(191, 22);
+            this.targetArchToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.targetArchToolStripMenuItem.Text = "Target Architecture";
             this.targetArchToolStripMenuItem.Visible = false;
             // 
@@ -214,24 +212,16 @@
             this.arm64ToolStripMenuItem.Size = new System.Drawing.Size(107, 22);
             this.arm64ToolStripMenuItem.Text = "arm64";
             // 
-            // automaticInstallationToolStripMenuItem
-            // 
-            this.automaticInstallationToolStripMenuItem.Name = "automaticInstallationToolStripMenuItem";
-            this.automaticInstallationToolStripMenuItem.Size = new System.Drawing.Size(191, 22);
-            this.automaticInstallationToolStripMenuItem.Text = "Automatic installation";
-            this.automaticInstallationToolStripMenuItem.Visible = false;
-            this.automaticInstallationToolStripMenuItem.Click += new System.EventHandler(this.automaticInstallationToolStripMenuItem_Click);
-            // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(188, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(177, 6);
             this.toolStripSeparator2.Visible = false;
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(191, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.exitToolStripMenuItem.Text = "E&xit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -409,7 +399,6 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.MenuStrip menuStrip;
         private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem automaticInstallationToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;

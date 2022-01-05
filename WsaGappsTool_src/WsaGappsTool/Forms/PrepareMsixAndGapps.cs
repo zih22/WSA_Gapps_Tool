@@ -59,7 +59,7 @@ namespace WsaGappsTool
             InitializeComponent();
         }
 
-        public PrepareMsixAndGapps(string msixPath, string gappsPath)
+        public PrepareMsixAndGapps(string msixPath, string gappsPath, SystemArchitecture targetArchitecture)
         {
             InitializeComponent();
             // Check if msixPath is empty
