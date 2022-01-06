@@ -34,7 +34,7 @@ namespace WsaGappsTool
         public bool ProcessSuccessful = false;
         //bool CanClose = false;
 
-        string WSA_InstallPath = "C:\\  WSA";
+        string WSA_InstallPath = "C:\\WSA";
         string WSA_AppxManifestPath;
 
         PerformanceCounter pCounter_usedMemory;
@@ -53,6 +53,7 @@ namespace WsaGappsTool
         public QEMU_Run(string msixPackage_savePath, bool install)
         {
             InitializeComponent();
+            WSA_InstallPath = msixPackage_savePath;
             WSA_AppxManifestPath = Path.Combine(WSA_InstallPath, "AppxManifest.xml");
             installPackage = install;
             linkLabel1.Text = moreInfo_expand_string;
@@ -72,7 +73,8 @@ namespace WsaGappsTool
                 //CloseWithError("Not enough system memory left to start VM.");
             }
 
-            QemuRunCommandArgs = String.Format(@"-no-user-config -display {2} -serial stdio -net nic -net user -M pc{3} -smp cores={0} -m {1} -device ich9-intel-hda -device ich9-ahci,id=sata -device ide-hd,bus=sata.2,drive=os,bootindex=0 -drive id=os,if=none,file=system.qcow2,format=qcow2,snapshot=on -device ide-hd,bus=sata.3,drive=DATA -drive id=DATA,if=none,file=data.vhdx,format=vhdx -device ide-hd,bus=sata.4,drive=CONFIG -drive id=CONFIG,if=none,file=config.vhdx,format=vhdx,snapshot=on", cores, config.DefaultVmMemoryAllocationAmount, EvaluateBool(qemu_showWindow, trueValue: "sdl", falseValue: "none"), EvaluateBool(SystemInfo.IsHyperVEnabled(), trueValue: " --accel whpx", falseValue: ""));
+            //QemuRunCommandArgs = String.Format(@"-no-user-config -display {2} -serial stdio -net nic -net user -M pc{3} -smp cores={0} -m {1} -device ich9-intel-hda -device ich9-ahci,id=sata -device ide-hd,bus=sata.2,drive=os,bootindex=0 -drive id=os,if=none,file=system.qcow2,format=qcow2,snapshot=on -device ide-hd,bus=sata.3,drive=DATA -drive id=DATA,if=none,file=data.vhdx,format=vhdx -device ide-hd,bus=sata.4,drive=CONFIG -drive id=CONFIG,if=none,file=config.vhdx,format=vhdx,snapshot=on", cores, config.DefaultVmMemoryAllocationAmount, EvaluateBool(qemu_showWindow, trueValue: "sdl", falseValue: "none"), EvaluateBool(SystemInfo.IsHyperVEnabled(), trueValue: " --accel whpx", falseValue: ""));
+            QemuRunCommandArgs = String.Format(@"-no-user-config -cpu max -display {2} -serial stdio -net nic -net user -M pc{3} -smp cores={0} -m {1} -device ahci,id=sata -device ide-hd,bus=sata.2,drive=os,bootindex=0 -drive id=os,if=none,file=system.qcow2,format=qcow2,snapshot=on -device ide-hd,bus=sata.3,drive=DATA -drive id=DATA,if=none,file=data.vhdx,format=vhdx -device ide-hd,bus=sata.4,drive=CONFIG -drive id=CONFIG,if=none,file=config.vhdx,format=vhdx,snapshot=on", cores, config.DefaultVmMemoryAllocationAmount, EvaluateBool(qemu_showWindow, trueValue: "sdl", falseValue: "none"), EvaluateBool(SystemInfo.IsHyperVEnabled(), trueValue: " --accel whpx", falseValue: ""));
             backgroundWorker_qemuVm.RunWorkerAsync();
         }
 
@@ -222,7 +224,7 @@ namespace WsaGappsTool
                 }
                 else
                 {
-                    setStatusText(e.Data);
+                    setStatusText("VM: " + e.Data);
                 }
             }
         }
@@ -272,11 +274,8 @@ namespace WsaGappsTool
                     }
                 }
             }
+
             MoveContents();
-            if (installPackage)
-            {
-                InstallPackage();
-            }
             setStatusText("Finishing up...");
         }
 
@@ -289,13 +288,74 @@ namespace WsaGappsTool
             }
             try
             {
-                Directory.Move(config.CacheDirectory + "msix/*", WSA_InstallPath);
+                //Directory.Move(config.CacheDirectory + "msix/*", WSA_InstallPath);
+                DirectoryCopy(config.CacheDirectory + "msix/", WSA_InstallPath, true);
+
+                // Register AppxManifest.xml
+                if (installPackage)
+                {
+                    InstallPackage();
+                }
                 return true;
             }
             catch (Exception ex)
             {
-                MessageBox.Show(String.Format("Could not move package contents to {1}: {0}", WSA_InstallPath, ex.Message), "Error moving contents", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return false;
+                if (Directory.Exists(WSA_InstallPath))
+                {
+                    try
+                    {
+                        Directory.Delete(WSA_InstallPath, true);
+                    }
+                    catch (Exception)
+                    {
+
+                    }
+                }
+                DialogResult dialogResult = MessageBox.Show(String.Format("Could not move package contents to {0}: {1}\r\nWould you like to retry?", WSA_InstallPath, ex.Message), "Error moving contents", MessageBoxButtons.RetryCancel, MessageBoxIcon.Error);
+                if(dialogResult == DialogResult.Retry)
+                {
+                    return MoveContents();
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+
+        private static void DirectoryCopy(string sourceDirName, string destDirName, bool copySubDirs)
+        {
+            // Get the subdirectories for the specified directory.
+            DirectoryInfo dir = new DirectoryInfo(sourceDirName);
+
+            if (!dir.Exists)
+            {
+                throw new DirectoryNotFoundException(
+                    "Source directory does not exist or could not be found: "
+                    + sourceDirName);
+            }
+
+            DirectoryInfo[] dirs = dir.GetDirectories();
+
+            // If the destination directory doesn't exist, create it.       
+            Directory.CreateDirectory(destDirName);
+
+            // Get the files in the directory and copy them to the new location.
+            FileInfo[] files = dir.GetFiles();
+            foreach (FileInfo file in files)
+            {
+                string tempPath = Path.Combine(destDirName, file.Name);
+                file.CopyTo(tempPath, false);
+            }
+
+            // If copying subdirectories, copy them and their contents to new location.
+            if (copySubDirs)
+            {
+                foreach (DirectoryInfo subdir in dirs)
+                {
+                    string tempPath = Path.Combine(destDirName, subdir.Name);
+                    DirectoryCopy(subdir.FullName, tempPath, copySubDirs);
+                }
             }
         }
 

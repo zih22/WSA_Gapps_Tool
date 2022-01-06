@@ -64,7 +64,7 @@
             // 
             this.label_processStatus.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.label_processStatus.Location = new System.Drawing.Point(12, 112);
+            this.label_processStatus.Location = new System.Drawing.Point(11, 112);
             this.label_processStatus.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label_processStatus.Name = "label_processStatus";
             this.label_processStatus.Size = new System.Drawing.Size(449, 40);

@@ -423,8 +423,8 @@ namespace WsaGappsTool
         {
             if (!(gapps_webClient.IsBusy || msix_webClient.IsBusy))
             {
-                timer1.Stop();
-                timer1.Enabled = false;
+                timer_infoSwitcher.Stop();
+                timer_infoSwitcher.Enabled = false;
                 backgroundWorker_PrepareFiles.RunWorkerAsync();
             }
         }
@@ -571,6 +571,11 @@ namespace WsaGappsTool
         }
 
         private void PrepareMsixAndGapps_FormClosing(object sender, FormClosingEventArgs e)
+        {
+
+        }
+
+        private void label_processStatus_Click(object sender, EventArgs e)
         {
 
         }

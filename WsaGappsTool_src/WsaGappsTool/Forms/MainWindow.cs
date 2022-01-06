@@ -26,6 +26,7 @@ namespace WsaGappsTool
         {
             performPathChecks();
             textBox_outputDirectory.Text = config.DefaultOutputDirectory;
+            outputDirectory_folderBrowserDialog.SelectedPath = config.DefaultOutputDirectory;
         }
 
         void RunProcess()
@@ -68,7 +69,7 @@ namespace WsaGappsTool
                             {
                                 Process.Start(textBox_outputDirectory.Text);
                             }
-                            MessageBox.Show("Process complete!", "Done!", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            // MessageBox.Show("Process complete!", "Done!", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         }
                     }
                 }

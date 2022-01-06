@@ -33,7 +33,7 @@
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.label_processStatus = new System.Windows.Forms.Label();
             this.cancelButton = new System.Windows.Forms.Button();
-            this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.timer_infoSwitcher = new System.Windows.Forms.Timer(this.components);
             this.backgroundWorker_PrepareFiles = new System.ComponentModel.BackgroundWorker();
             this.SuspendLayout();
             // 
@@ -64,13 +64,14 @@
             // 
             this.label_processStatus.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.label_processStatus.Location = new System.Drawing.Point(11, 62);
+            this.label_processStatus.Location = new System.Drawing.Point(11, 61);
             this.label_processStatus.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label_processStatus.Name = "label_processStatus";
             this.label_processStatus.Size = new System.Drawing.Size(466, 40);
             this.label_processStatus.TabIndex = 2;
             this.label_processStatus.Text = "Getting ready...";
             this.label_processStatus.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
+            this.label_processStatus.Click += new System.EventHandler(this.label_processStatus_Click);
             // 
             // cancelButton
             // 
@@ -85,11 +86,11 @@
             this.cancelButton.UseVisualStyleBackColor = true;
             this.cancelButton.Click += new System.EventHandler(this.cancelButton_Click);
             // 
-            // timer1
+            // timer_infoSwitcher
             // 
-            this.timer1.Enabled = true;
-            this.timer1.Interval = 3000;
-            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
+            this.timer_infoSwitcher.Enabled = true;
+            this.timer_infoSwitcher.Interval = 3000;
+            this.timer_infoSwitcher.Tick += new System.EventHandler(this.timer1_Tick);
             // 
             // backgroundWorker_PrepareFiles
             // 
@@ -129,7 +130,7 @@
         private System.Windows.Forms.ProgressBar progressBar1;
         private System.Windows.Forms.Label label_processStatus;
         private System.Windows.Forms.Button cancelButton;
-        private System.Windows.Forms.Timer timer1;
+        private System.Windows.Forms.Timer timer_infoSwitcher;
         private System.ComponentModel.BackgroundWorker backgroundWorker_PrepareFiles;
     }
 }
