@@ -4,6 +4,8 @@ Simple tool for adding Google apps and services to WSA system images, without th
 
 Note: This tool **only** runs on Windows.
 
+***This project is very much still in development, and requires a lot of work before a beta version can be released.***
+
 ## Minimum requirements
 - Windows 11 (tool can be used on Windows 10 for generating MSIX package only)
 - .NET Framework 4.7.2
