@@ -6,8 +6,8 @@ Note: This tool **only** runs on Windows.
 
 ***This project is very much still in development, and requires a lot of work before a beta version can be released.***
 
-## Minimum requirements
-- Windows 11 (tool can be used on Windows 10 for generating MSIX package only)
+## Minimum system requirements
+- Windows 11 (the tool can be used on Windows 10, but only for generating the MSIX package)
 - .NET Framework 4.7.2
 - 8 GB of RAM (at least 10 - 12 GB is ideal, especially for WSA)
 - At least 16 GB of free space on your system drive (a solid-state drive is ***highly*** recommended)
@@ -16,16 +16,17 @@ Note: This tool **only** runs on Windows.
 ## How it works (In-depth)
 Step 1: When the user clicks the Start button on the main window, the application will create a folder in the same location as itself named `cache`, and will use it to prepare the required files. First, it checks to see if it needs to download the latest Android 11 gapps package and/or the WSA MSIX application package (and does so if needed), then it begins getting everything ready.
 
-Step 2: Once the application knows it has all the files it needs, it begins preparing them. It starts off by extracting the MSIX package to `cache/msix`, and collecting the included Android system images. It then creates a folder (`cache/temp`), and creates the following folders inside it: `images` | `gapps`. This directory will be used later to generate `data.vhdx` for use with the QEMU virtual machine.
+Step 2: Once the application knows it has all the files it needs, it begins preparing them. It starts off by extracting the MSIX package to `cache/msix`, and collecting the Android system images that were inside the package. It then creates a folder (`cache/temp`), and creates the following folders inside it: `images` | `gapps`. These folders will be used later to generate `data.vhdx` for use with the QEMU virtual machine.
 
 Step 3: The application copies the following files: `system.img`, `system_ext.img`, `vendor.img` and `product.img` to `cache/temp/images`, followed by copying the gapps zip file to `cache/temp/gapps`.
 
 Step 4: At this point, the application is done copying the files. The last step for preparation is to create an 8GB VHDX virtual disk image named `data.vhdx` in the `vm` folder at the root of the repository directory, followed by writing the contents of `cache/temp` to it. File preparation is now complete, and the virtual machine will now have everything it needs to successfully modify the Android system images.
 
 Step 5: The application starts QEMU in headless mode as follows:
+  - Ignore any other QEMU configuration to avoid potential problems
   - Give VM as many cores as the host CPU has
   - Allocate 1024 MB of RAM (or 2048 MB, depending on what's available)
-  - Map virtual serial port to stdio (so that the application can receive and process messages from the VM)
+  - Map virtual serial port to QEMU [stdout](https://www.computerhope.com/jargon/s/stdout.htm) (so that the application can receive and process messages from the VM)
   - Attach `vm/system.qcow2` as drive 0, with bootindex=0 and snapshot mode on, so any changes are not persistent
   - Attach `vm/data.vhdx` as drive 1 (will be /dev/sdb1 in VM)
   - Attach `vm/config.vhdx` as drive 2 (will be /dev/sdc1 in VM)
@@ -55,3 +56,9 @@ NOTE: Download uses ~900MB. Minimum free space required is 8 GB.
 **NOTE: If your machine does not meet all the hardware requirements as listed [above](#minimum-requirements), it's a good idea to close as many applications as you can to free up memory and CPU resources.
 
 Once the tool is done, if you are running Windows 11, the tool will move everything it has done to `C:\WSA`, and will run `Add-AppxPackage` to register the AppxManifest.xml file in the package, and allow the app to be used.
+
+
+## Resources
+This project would not be possible without the following tools and resources, and their developers:
+  - WSA-Community for creating [WSAGAScript](https://github.com/WSA-Community/WSAGAScript)
+  - [QEMU emulator](https://www.qemu.org/) used for the virtual Linux environment
