@@ -1,6 +1,6 @@
 # WSA_Gapps_Tool
 
-Simple tool for adding Google apps and services to WSA system images, without the need for WSL (or having to interact with a terminal).
+Simple tool for injecting Google apps and services into WSA system images, without the need for WSL (or having to interact with a terminal).
 
 Note: This tool **only** runs on Windows.
 
